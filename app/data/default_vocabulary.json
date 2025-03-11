@@ -1,62 +1,1202 @@
 [
     {
-        "japanese": "言葉",
-        "hiragana": "ことば",
-        "meaning": "單字；語言",
-        "id": 0
+      "japanese": "妊娠",
+      "hiragana": "にんしん",
+      "meaning": "pregnancy; conception; gestation；Pregnancy",
+      "id": 0
     },
     {
-        "japanese": "勉強",
-        "hiragana": "べんきょう",
-        "meaning": "學習；研究",
-        "id": 1
+      "japanese": "運命",
+      "hiragana": "うんめい",
+      "meaning": "fate; destiny; lot；Destiny",
+      "id": 1
     },
     {
-        "japanese": "頑張る",
-        "hiragana": "がんばる",
-        "meaning": "加油；努力",
-        "id": 2
+      "japanese": "銅",
+      "hiragana": "どう",
+      "meaning": "copper (Cu)；bronze (medal)",
+      "id": 2
     },
     {
-        "japanese": "理解",
-        "hiragana": "りかい",
-        "meaning": "理解；明白",
-        "id": 3
+      "japanese": "洪水",
+      "hiragana": "こうずい",
+      "meaning": "flood; flooding；Flood",
+      "id": 3
     },
     {
-        "japanese": "記憶",
-        "hiragana": "きおく",
-        "meaning": "記憶；回憶",
-        "id": 4
+      "japanese": "久しぶり",
+      "hiragana": "ひさ",
+      "meaning": "a long time (since the last time); first in a long time；it's been a long time; long time no see",
+      "id": 4
     },
     {
-        "japanese": "実現",
-        "hiragana": "じつげん",
-        "meaning": "實現；達成",
-        "id": 5
+      "japanese": "祈り",
+      "hiragana": "いの",
+      "meaning": "prayer; supplication；Prayer",
+      "id": 5
     },
     {
-        "japanese": "経験",
-        "hiragana": "けいけん",
-        "meaning": "經驗；體驗",
-        "id": 6
+      "japanese": "黄金",
+      "hiragana": "おうごん",
+      "meaning": "gold (Au)；golden; prosperous; excellent; superb",
+      "id": 6
     },
     {
-        "japanese": "成功",
-        "hiragana": "せいこう",
-        "meaning": "成功；成就",
-        "id": 7
+      "japanese": "貧困",
+      "hiragana": "ひんこん",
+      "meaning": "poverty; penury; need; destitution；shortage; lack; want",
+      "id": 7
     },
     {
-        "japanese": "失敗",
-        "hiragana": "しっぱい",
-        "meaning": "失敗；錯誤",
-        "id": 8
+      "japanese": "貴方",
+      "hiragana": "あなた",
+      "meaning": "you；dear; honey",
+      "id": 8
     },
     {
-        "japanese": "努力",
-        "hiragana": "どりょく",
-        "meaning": "努力；盡力",
-        "id": 9
+      "japanese": "弟",
+      "hiragana": "おとうと",
+      "meaning": "younger brother; little brother; kid brother；brother-in-law (spouse's younger brother or younger sister's husband)",
+      "id": 9
+    },
+    {
+      "japanese": "赤ちゃん",
+      "hiragana": "あか",
+      "meaning": "baby; infant；Infant",
+      "id": 10
+    },
+    {
+      "japanese": "仏像",
+      "hiragana": "ぶつぞう",
+      "meaning": "statue of Buddha; image of Buddha; Buddhist statue; Buddhist image；Butsuzou",
+      "id": 11
+    },
+    {
+      "japanese": "尾",
+      "hiragana": "お",
+      "meaning": "tail (of an animal); cauda；tail (of a kite, etc.); tail end",
+      "id": 12
+    },
+    {
+      "japanese": "説得",
+      "hiragana": "せっとく",
+      "meaning": "persuasion；Persuasion",
+      "id": 13
+    },
+    {
+      "japanese": "取引",
+      "hiragana": "とりひき",
+      "meaning": "transactions; dealings; business；Trade",
+      "id": 14
+    },
+    {
+      "japanese": "昼間",
+      "hiragana": "ひるま",
+      "meaning": "daytime; during the day; time from sunrise until sunset; diurnal period；昼間 【ちゅうかん】",
+      "id": 15
+    },
+    {
+      "japanese": "落ちる",
+      "hiragana": "お",
+      "meaning": "to fall; to drop; to come down; to crash; to collapse; to cave in; to give way；to set (of the sun or moon); to sink; to dip; to go down",
+      "id": 16
+    },
+    {
+      "japanese": "此れ",
+      "hiragana": "こ",
+      "meaning": "this; this one；this person",
+      "id": 17
+    },
+    {
+      "japanese": "天皇",
+      "hiragana": "てんのう",
+      "meaning": "Emperor of Japan；Tennou",
+      "id": 18
+    },
+    {
+      "japanese": "下がる",
+      "hiragana": "さ",
+      "meaning": "to come down; to go down; to fall; to drop; to sink; to get lower；to hang; to dangle",
+      "id": 19
+    },
+    {
+      "japanese": "向き",
+      "hiragana": "む",
+      "meaning": "direction; orientation; aspect; exposure；suited to; suitable for; designed for",
+      "id": 20
+    },
+    {
+      "japanese": "と",
+      "hiragana": "と",
+      "meaning": "if; when；and",
+      "id": 21
+    },
+    {
+      "japanese": "死刑",
+      "hiragana": "しけい",
+      "meaning": "death penalty; capital punishment；Capital punishment",
+      "id": 22
+    },
+    {
+      "japanese": "百科事典",
+      "hiragana": "ひゃっかじてん",
+      "meaning": "encyclopedia; encyclopaedia；Encyclopedia",
+      "id": 23
+    },
+    {
+      "japanese": "妥協",
+      "hiragana": "だきょう",
+      "meaning": "compromise; giving in；Compromise",
+      "id": 24
+    },
+    {
+      "japanese": "彼処",
+      "hiragana": "あそこ",
+      "meaning": "there; over there; that place; yonder; you-know-where；genitals; private parts; nether regions",
+      "id": 25
+    },
+    {
+      "japanese": "航海",
+      "hiragana": "こうかい",
+      "meaning": "Navigation",
+      "id": 26
+    },
+    {
+      "japanese": "国境",
+      "hiragana": "こっきょう",
+      "meaning": "border (between countries); national border；Kunizakai",
+      "id": 27
+    },
+    {
+      "japanese": "革命",
+      "hiragana": "かくめい",
+      "meaning": "revolution；58th year of the sexagenary cycle (in Onmyōdō)",
+      "id": 28
+    },
+    {
+      "japanese": "灰皿",
+      "hiragana": "はいざら",
+      "meaning": "ashtray；Ashtray",
+      "id": 29
+    },
+    {
+      "japanese": "美",
+      "hiragana": "び",
+      "meaning": "beauty；Beauty",
+      "id": 30
+    },
+    {
+      "japanese": "矢",
+      "hiragana": "や",
+      "meaning": "arrow；wedge; chock",
+      "id": 31
+    },
+    {
+      "japanese": "改革",
+      "hiragana": "かいかく",
+      "meaning": "reform; reformation; reorganization；Reform movement",
+      "id": 32
+    },
+    {
+      "japanese": "暇",
+      "hiragana": "ひま",
+      "meaning": "spare time; free time; leisure；time (it takes to do something); time required",
+      "id": 33
+    },
+    {
+      "japanese": "見合い",
+      "hiragana": "みあ",
+      "meaning": "correspondence; balance；two different options such that if one player takes one, the other player can take the other",
+      "id": 34
+    },
+    {
+      "japanese": "富",
+      "hiragana": "とみ",
+      "meaning": "riches; wealth; fortune；resources",
+      "id": 35
+    },
+    {
+      "japanese": "お祖母さん",
+      "hiragana": "ばあ",
+      "meaning": "grandmother；old woman; female senior citizen",
+      "id": 36
+    },
+    {
+      "japanese": "距離",
+      "hiragana": "きょり",
+      "meaning": "distance; range; interval；difference (e.g. in opinion); gap; distance",
+      "id": 37
+    },
+    {
+      "japanese": "燃料",
+      "hiragana": "ねんりょう",
+      "meaning": "fuel；Fuel",
+      "id": 38
+    },
+    {
+      "japanese": "惑星",
+      "hiragana": "わくせい",
+      "meaning": "planet；dark horse; surprise contender",
+      "id": 39
+    },
+    {
+      "japanese": "危機",
+      "hiragana": "きき",
+      "meaning": "crisis; critical situation; emergency; pinch；Close to the Edge (Yes album)",
+      "id": 40
+    },
+    {
+      "japanese": "一日",
+      "hiragana": "いちにち",
+      "meaning": "one day；all day (long); the whole day; from morning till night",
+      "id": 41
+    },
+    {
+      "japanese": "海運",
+      "hiragana": "かいうん",
+      "meaning": "maritime transport; shipping；Kaiun",
+      "id": 42
+    },
+    {
+      "japanese": "賃金",
+      "hiragana": "ちんぎん",
+      "meaning": "wages; pay；rental payment",
+      "id": 43
+    },
+    {
+      "japanese": "自信",
+      "hiragana": "じしん",
+      "meaning": "self-confidence; confidence (in oneself)；Confidence",
+      "id": 44
+    },
+    {
+      "japanese": "古代",
+      "hiragana": "こだい",
+      "meaning": "ancient times; distant past; antiquity；Ancient history",
+      "id": 45
+    },
+    {
+      "japanese": "世",
+      "hiragana": "よ",
+      "meaning": "world; society; public；life; lifetime",
+      "id": 46
+    },
+    {
+      "japanese": "誰",
+      "hiragana": "だれ",
+      "meaning": "who；誰 【だあれ】",
+      "id": 47
+    },
+    {
+      "japanese": "此の",
+      "hiragana": "こ",
+      "meaning": "this；last (couple of years, etc.); these; past; this",
+      "id": 48
+    },
+    {
+      "japanese": "爆弾",
+      "hiragana": "ばくだん",
+      "meaning": "bomb；alcohol with liquor added (esp. wine-based shōchū highball, also beer with whiskey)",
+      "id": 49
+    },
+    {
+      "japanese": "六",
+      "hiragana": "ろく",
+      "meaning": "six; 6；六 【む】、六 【むう】、６ 【ろく】、６ 【む】、６ 【むう】、陸 【ろく】、陸 【む】、陸 【むう】",
+      "id": 50
+    },
+    {
+      "japanese": "同情",
+      "hiragana": "どうじょう",
+      "meaning": "sympathy; compassion; pity；Sympathy",
+      "id": 51
+    },
+    {
+      "japanese": "年寄り",
+      "hiragana": "としよ",
+      "meaning": "old person; elderly person; senior citizen；trustee of the Japan Sumo Association; retired high-ranking wrestler who is licensed to coach and receives retirement pay",
+      "id": 52
+    },
+    {
+      "japanese": "自己",
+      "hiragana": "じこ",
+      "meaning": "self; oneself；Psychology of self",
+      "id": 53
+    },
+    {
+      "japanese": "移民",
+      "hiragana": "いみん",
+      "meaning": "immigration; emigration；immigrant; emigrant",
+      "id": 54
+    },
+    {
+      "japanese": "屡々",
+      "hiragana": "しばしば",
+      "meaning": "often; again and again; frequently; repeatedly；Number",
+      "id": 55
+    },
+    {
+      "japanese": "秘書",
+      "hiragana": "ひしょ",
+      "meaning": "treasured book; secret book；Secretary",
+      "id": 56
+    },
+    {
+      "japanese": "転々",
+      "hiragana": "てんてん",
+      "meaning": "moving from place to place; being passed around repeatedly；rolling about",
+      "id": 57
+    },
+    {
+      "japanese": "定義",
+      "hiragana": "ていぎ",
+      "meaning": "definition；Definition",
+      "id": 58
+    },
+    {
+      "japanese": "釣り",
+      "hiragana": "つ",
+      "meaning": "fishing; angling；change (for a purchase)",
+      "id": 59
+    },
+    {
+      "japanese": "交渉",
+      "hiragana": "こうしょう",
+      "meaning": "negotiations; bargaining; discussions; talks；connection; relationship; relations; dealings",
+      "id": 60
+    },
+    {
+      "japanese": "保証",
+      "hiragana": "ほしょう",
+      "meaning": "guarantee; security; assurance; pledge；warranty",
+      "id": 61
+    },
+    {
+      "japanese": "殺人",
+      "hiragana": "さつじん",
+      "meaning": "murder; homicide; manslaughter；Murder",
+      "id": 62
+    },
+    {
+      "japanese": "茹でる",
+      "hiragana": "ゆ",
+      "meaning": "to boil (something in hot water)；to treat with medicinal steam (a swelling, etc.)",
+      "id": 63
+    },
+    {
+      "japanese": "予言",
+      "hiragana": "よげん",
+      "meaning": "prediction; prophecy; prognostication; foretelling; forecast；Prediction",
+      "id": 64
+    },
+    {
+      "japanese": "少女",
+      "hiragana": "しょうじょ",
+      "meaning": "girl (usu. between 7 and 17); young lady；female between 17 and 20 years old (ritsuryō period)",
+      "id": 65
+    },
+    {
+      "japanese": "理論",
+      "hiragana": "りろん",
+      "meaning": "theory；Theory",
+      "id": 66
+    },
+    {
+      "japanese": "小切手",
+      "hiragana": "こぎって",
+      "meaning": "cheque; check；Cheque",
+      "id": 67
+    },
+    {
+      "japanese": "嬢",
+      "hiragana": "じょう",
+      "meaning": "unmarried woman；Miss",
+      "id": 68
+    },
+    {
+      "japanese": "資格",
+      "hiragana": "しかく",
+      "meaning": "qualifications; requirements; capabilities；Professional certification",
+      "id": 69
+    },
+    {
+      "japanese": "切り",
+      "hiragana": "き",
+      "meaning": "end; finish; place to stop；bound; limit; end",
+      "id": 70
+    },
+    {
+      "japanese": "動機",
+      "hiragana": "どうき",
+      "meaning": "motive; incentive；motif",
+      "id": 71
+    },
+    {
+      "japanese": "制服",
+      "hiragana": "せいふく",
+      "meaning": "uniform；Uniform",
+      "id": 72
+    },
+    {
+      "japanese": "鼠",
+      "hiragana": "ねずみ",
+      "meaning": "mouse; rat；dark gray; slate gray",
+      "id": 73
+    },
+    {
+      "japanese": "一寸",
+      "hiragana": "ちょっと",
+      "meaning": "a little; a bit; slightly；just a minute; for a moment; briefly",
+      "id": 74
+    },
+    {
+      "japanese": "落とす",
+      "hiragana": "お",
+      "meaning": "to drop; to lose; to let fall; to shed (light); to cast (one's gaze); to pour in (liquid); to leave behind；to clean off (dirt, makeup, paint, etc.); to remove (e.g. stains or facial hair); to lose; to spend money at a certain place; to omit; to leave out; to secretly let escape",
+      "id": 75
+    },
+    {
+      "japanese": "農場",
+      "hiragana": "のうじょう",
+      "meaning": "farm (agriculture)；Noujou",
+      "id": 76
+    },
+    {
+      "japanese": "選挙",
+      "hiragana": "せんきょ",
+      "meaning": "election；Election",
+      "id": 77
+    },
+    {
+      "japanese": "楽しむ",
+      "hiragana": "たの",
+      "meaning": "to enjoy; to take pleasure in; to have a good time; to have fun; to amuse oneself；to look forward to",
+      "id": 78
+    },
+    {
+      "japanese": "保険",
+      "hiragana": "ほけん",
+      "meaning": "insurance；guarantee; warranty",
+      "id": 79
+    },
+    {
+      "japanese": "怒る",
+      "hiragana": "おこ",
+      "meaning": "to get angry; to get mad; to lose one's temper；to scold; to tell (someone) off",
+      "id": 80
+    },
+    {
+      "japanese": "決断",
+      "hiragana": "けつだん",
+      "meaning": "decision; determination；Decision",
+      "id": 81
+    },
+    {
+      "japanese": "何の",
+      "hiragana": "ど",
+      "meaning": "which; what (way)",
+      "id": 82
+    },
+    {
+      "japanese": "死",
+      "hiragana": "し",
+      "meaning": "death；death penalty (by strangulation or decapitation; most severe of the five ritsuryō punishments)",
+      "id": 83
+    },
+    {
+      "japanese": "綺麗",
+      "hiragana": "きれい",
+      "meaning": "pretty; lovely; beautiful; fair；clean; clear; pure; tidy; neat",
+      "id": 84
+    },
+    {
+      "japanese": "実業家",
+      "hiragana": "じつぎょうか",
+      "meaning": "businessperson; businessman; businesswoman; entrepreneur; captain of industry；Businessperson",
+      "id": 85
+    },
+    {
+      "japanese": "良い",
+      "hiragana": "よ",
+      "meaning": "good; excellent; fine; nice; pleasant; agreeable；sufficient; enough; ready; prepared",
+      "id": 86
+    },
+    {
+      "japanese": "子",
+      "hiragana": "こ",
+      "meaning": "child; kid; teenager; youngster; young (non-adult) person；young woman",
+      "id": 87
+    },
+    {
+      "japanese": "終わる",
+      "hiragana": "お",
+      "meaning": "to end; to come to an end; to finish; to close; to be over；to finish; to complete; to conclude",
+      "id": 88
+    },
+    {
+      "japanese": "人民",
+      "hiragana": "じんみん",
+      "meaning": "the people; citizens; the populace；People",
+      "id": 89
+    },
+    {
+      "japanese": "錆",
+      "hiragana": "さび",
+      "meaning": "rust；Rust",
+      "id": 90
+    },
+    {
+      "japanese": "音",
+      "hiragana": "おと",
+      "meaning": "sound; noise；fame",
+      "id": 91
+    },
+    {
+      "japanese": "振り",
+      "hiragana": "ふ",
+      "meaning": "swing; shake; sweep; wave; wag；appearance; behaviour; behavior",
+      "id": 92
+    },
+    {
+      "japanese": "作る",
+      "hiragana": "つく",
+      "meaning": "to make; to produce; to manufacture; to build; to construct；to prepare (food); to brew (alcohol)",
+      "id": 93
+    },
+    {
+      "japanese": "名誉",
+      "hiragana": "めいよ",
+      "meaning": "honor; honour; credit; glory; fame; distinction；prestige; dignity; reputation; honor; good name",
+      "id": 94
+    },
+    {
+      "japanese": "メガネ",
+      "hiragana": "メガネ",
+      "meaning": "glasses; eyeglasses; spectacles；judgment; judgement; discrimination; discernment; insight",
+      "id": 95
+    },
+    {
+      "japanese": "段々",
+      "hiragana": "だんだん",
+      "meaning": "gradually; by degrees; little by little; more and more; increasingly；steps; stairs; staircase; terrace",
+      "id": 96
+    },
+    {
+      "japanese": "孤独",
+      "hiragana": "こどく",
+      "meaning": "solitude; loneliness; isolation；Solitude",
+      "id": 97
+    },
+    {
+      "japanese": "世代",
+      "hiragana": "せだい",
+      "meaning": "generation；Generation",
+      "id": 98
+    },
+    {
+      "japanese": "煙草",
+      "hiragana": "タバコ",
+      "meaning": "tobacco; cigarette; cigar；tobacco plant (Nicotiana tabacum)",
+      "id": 99
+    },
+    {
+      "japanese": "破壊",
+      "hiragana": "はかい",
+      "meaning": "destruction; disruption；Subversion",
+      "id": 100
+    },
+    {
+      "japanese": "津波",
+      "hiragana": "つなみ",
+      "meaning": "tsunami; tidal wave；Tsunami",
+      "id": 101
+    },
+    {
+      "japanese": "財政",
+      "hiragana": "ざいせい",
+      "meaning": "public finance；financial affairs; financial situation",
+      "id": 102
+    },
+    {
+      "japanese": "如何して",
+      "hiragana": "どう",
+      "meaning": "how; in what way; by what means；why; for what reason; for what purpose; what for",
+      "id": 103
+    },
+    {
+      "japanese": "乗り換え",
+      "hiragana": "のか",
+      "meaning": "transfer (trains, buses, etc.); change; connection；switch (to another ideology, party, system, method, etc.); change; conversion",
+      "id": 104
+    },
+    {
+      "japanese": "曲がる",
+      "hiragana": "ま",
+      "meaning": "to bend; to curve; to warp; to wind; to twist；to turn",
+      "id": 105
+    },
+    {
+      "japanese": "反応",
+      "hiragana": "はんのう",
+      "meaning": "reaction; response；Reaction",
+      "id": 106
+    },
+    {
+      "japanese": "予想",
+      "hiragana": "よそう",
+      "meaning": "expectation; anticipation; prediction; forecast; conjecture；Conjecture",
+      "id": 107
+    },
+    {
+      "japanese": "三",
+      "hiragana": "さん",
+      "meaning": "three; 3；三 【み】、３ 【さん】、３ 【み】、参 【さん】、参 【み】、參 【さん】、參 【み】、弎 【さん】、弎 【み】",
+      "id": 108
+    },
+    {
+      "japanese": "上がる",
+      "hiragana": "あ",
+      "meaning": "to rise; to go up; to come up; to ascend; to be raised；to enter (esp. from outdoors); to come in; to go in",
+      "id": 109
+    },
+    {
+      "japanese": "流通",
+      "hiragana": "りゅうつう",
+      "meaning": "circulation (of money, goods, etc.); distribution；circulation (of air, water, etc.); ventilation; flow",
+      "id": 110
+    },
+    {
+      "japanese": "不味い",
+      "hiragana": "まず",
+      "meaning": "bad(-tasting); unpalatable; unsavoury; unsavory; awful; terrible; unpleasant；poor; unskillful; unskilful; bungling; clumsy",
+      "id": 111
+    },
+    {
+      "japanese": "余り",
+      "hiragana": "あま",
+      "meaning": "remainder; remnant; rest; balance; surplus; remains (of a meal); leftovers；too much; excessively; overly",
+      "id": 112
+    },
+    {
+      "japanese": "明るい",
+      "hiragana": "あか",
+      "meaning": "light; bright; well-lit; well-lighted；bright (colour)",
+      "id": 113
+    },
+    {
+      "japanese": "保護",
+      "hiragana": "ほご",
+      "meaning": "protection; safeguard; guardianship; custody; patronage；preservation; conservation",
+      "id": 114
+    },
+    {
+      "japanese": "途中",
+      "hiragana": "とちゅう",
+      "meaning": "on the way; en route；in the middle of; midway; halfway",
+      "id": 115
+    },
+    {
+      "japanese": "其方",
+      "hiragana": "そちら",
+      "meaning": "that way; that direction；there",
+      "id": 116
+    },
+    {
+      "japanese": "面白い",
+      "hiragana": "おもしろ",
+      "meaning": "interesting; fascinating; intriguing; enthralling；amusing; funny; comical",
+      "id": 117
+    },
+    {
+      "japanese": "何故",
+      "hiragana": "なぜ",
+      "meaning": "why; how; for what reason",
+      "id": 118
+    },
+    {
+      "japanese": "勝利",
+      "hiragana": "しょうり",
+      "meaning": "victory; triumph; win; conquest; success；Victory",
+      "id": 119
+    },
+    {
+      "japanese": "日付",
+      "hiragana": "ひづけ",
+      "meaning": "date; dating；Calendar date",
+      "id": 120
+    },
+    {
+      "japanese": "運命",
+      "hiragana": "うんめい",
+      "meaning": "fate; destiny; lot；Destiny",
+      "id": 121
+    },
+    {
+      "japanese": "伝説",
+      "hiragana": "でんせつ",
+      "meaning": "legend; folklore; tradition；Legend",
+      "id": 122
+    },
+    {
+      "japanese": "悪",
+      "hiragana": "あく",
+      "meaning": "evil; wickedness；Evil",
+      "id": 123
+    },
+    {
+      "japanese": "網",
+      "hiragana": "あみ",
+      "meaning": "net; netting；web",
+      "id": 124
+    },
+    {
+      "japanese": "位置",
+      "hiragana": "いち",
+      "meaning": "place; position; location；position; standing; status; situation",
+      "id": 125
+    },
+    {
+      "japanese": "銃",
+      "hiragana": "じゅう",
+      "meaning": "gun; rifle; small arms；Firearm",
+      "id": 126
+    },
+    {
+      "japanese": "真珠",
+      "hiragana": "しんじゅ",
+      "meaning": "pearl；Pearl",
+      "id": 127
+    },
+    {
+      "japanese": "起こす",
+      "hiragana": "お",
+      "meaning": "to raise; to raise up; to set up; to pick up；to wake; to wake up; to waken; to awaken",
+      "id": 128
+    },
+    {
+      "japanese": "煩い",
+      "hiragana": "うるさ",
+      "meaning": "noisy; loud；annoying; troublesome; tiresome; persistent; importunate",
+      "id": 129
+    },
+    {
+      "japanese": "災害",
+      "hiragana": "さいがい",
+      "meaning": "calamity; disaster; misfortune；Disaster",
+      "id": 130
+    },
+    {
+      "japanese": "幽霊",
+      "hiragana": "ゆうれい",
+      "meaning": "ghost; specter; spectre; apparition; phantom；Yūrei",
+      "id": 131
+    },
+    {
+      "japanese": "人格",
+      "hiragana": "じんかく",
+      "meaning": "personality; character; individuality; personhood；Persona",
+      "id": 132
+    },
+    {
+      "japanese": "聖書",
+      "hiragana": "せいしょ",
+      "meaning": "Bible; the Scriptures; Holy Writ；Bible",
+      "id": 133
+    },
+    {
+      "japanese": "詰らない",
+      "hiragana": "つま",
+      "meaning": "dull; uninteresting; boring; tedious；insignificant; unimportant; trifling; trivial; worthless",
+      "id": 134
+    },
+    {
+      "japanese": "紳士",
+      "hiragana": "しんし",
+      "meaning": "gentleman；Gentleman",
+      "id": 135
+    },
+    {
+      "japanese": "何処",
+      "hiragana": "どこ",
+      "meaning": "where; what place；how much (long, far); what extent",
+      "id": 136
+    },
+    {
+      "japanese": "暴力",
+      "hiragana": "ぼうりょく",
+      "meaning": "violence; mayhem；Violence",
+      "id": 137
+    },
+    {
+      "japanese": "天才",
+      "hiragana": "てんさい",
+      "meaning": "genius; prodigy; natural gift；Genius",
+      "id": 138
+    },
+    {
+      "japanese": "何方",
+      "hiragana": "どなた",
+      "meaning": "who",
+      "id": 139
+    },
+    {
+      "japanese": "玩具",
+      "hiragana": "おもちゃ",
+      "meaning": "toy；Toy",
+      "id": 140
+    },
+    {
+      "japanese": "昆虫",
+      "hiragana": "こんちゅう",
+      "meaning": "insect; bug；Insect",
+      "id": 141
+    },
+    {
+      "japanese": "報道",
+      "hiragana": "ほうどう",
+      "meaning": "report (of news); reporting; news; information; (media) coverage；Journalism",
+      "id": 142
+    },
+    {
+      "japanese": "権力",
+      "hiragana": "けんりょく",
+      "meaning": "Power (philosophy)",
+      "id": 143
+    },
+    {
+      "japanese": "色々",
+      "hiragana": "いろいろ",
+      "meaning": "various; a variety of; all sorts of; many (different)；variously; in various ways; in many ways",
+      "id": 144
+    },
+    {
+      "japanese": "証拠",
+      "hiragana": "しょうこ",
+      "meaning": "evidence; proof；Evidence (law)",
+      "id": 145
+    },
+    {
+      "japanese": "判決",
+      "hiragana": "はんけつ",
+      "meaning": "judicial decision; judgement; judgment; sentence; decree；Judgment (law)",
+      "id": 146
+    },
+    {
+      "japanese": "歯磨き",
+      "hiragana": "はみが",
+      "meaning": "dental brushing; brushing one's teeth；dentifrice; toothpaste; tooth powder",
+      "id": 147
+    },
+    {
+      "japanese": "其処",
+      "hiragana": "そこ",
+      "meaning": "there (place relatively near listener)；there (place just mentioned); that place",
+      "id": 148
+    },
+    {
+      "japanese": "真ん中",
+      "hiragana": "まなか",
+      "meaning": "middle; centre; center; midpoint; heart",
+      "id": 149
+    },
+    {
+      "japanese": "其れ",
+      "hiragana": "そ",
+      "meaning": "that; it；then; that point (in time); that time",
+      "id": 150
+    },
+    {
+      "japanese": "中指",
+      "hiragana": "なかゆび",
+      "meaning": "middle finger; long finger; second finger; tall finger；middle toe; third toe",
+      "id": 151
+    },
+    {
+      "japanese": "着陸",
+      "hiragana": "ちゃくりく",
+      "meaning": "landing; alighting; touch down；Landing",
+      "id": 152
+    },
+    {
+      "japanese": "集まる",
+      "hiragana": "あつ",
+      "meaning": "to gather; to collect; to assemble；集る 【あつまる】",
+      "id": 153
+    },
+    {
+      "japanese": "曖昧",
+      "hiragana": "あいまい",
+      "meaning": "vague; ambiguous; unclear；shady; disreputable",
+      "id": 154
+    },
+    {
+      "japanese": "入浴",
+      "hiragana": "にゅうよく",
+      "meaning": "bathing; going in the bath；Bathing",
+      "id": 155
+    },
+    {
+      "japanese": "体",
+      "hiragana": "からだ",
+      "meaning": "body；torso; trunk",
+      "id": 156
+    },
+    {
+      "japanese": "承諾",
+      "hiragana": "しょうだく",
+      "meaning": "consent; approval; acceptance; agreement; compliance；Acceptance",
+      "id": 157
+    },
+    {
+      "japanese": "然し",
+      "hiragana": "しか",
+      "meaning": "however; but；併し 【しかし】",
+      "id": 158
+    },
+    {
+      "japanese": "お手洗い",
+      "hiragana": "てあら",
+      "meaning": "toilet; restroom; lavatory; bathroom；御手洗 【おてあらい】",
+      "id": 159
+    },
+    {
+      "japanese": "迚も",
+      "hiragana": "とて",
+      "meaning": "very; awfully; exceedingly；迚も 【とっても】",
+      "id": 160
+    },
+    {
+      "japanese": "梯子",
+      "hiragana": "はしご",
+      "meaning": "ladder；stairs",
+      "id": 161
+    },
+    {
+      "japanese": "ネジ",
+      "hiragana": "ネジ",
+      "meaning": "screw；key (of a clock, watch, etc.); spring",
+      "id": 162
+    },
+    {
+      "japanese": "権威",
+      "hiragana": "けんい",
+      "meaning": "authority; power; influence; prestige；Authority",
+      "id": 163
+    },
+    {
+      "japanese": "雷",
+      "hiragana": "かみなり",
+      "meaning": "lightning; thunder; thunderbolt；god of thunder; god of lightning",
+      "id": 164
+    },
+    {
+      "japanese": "治療",
+      "hiragana": "ちりょう",
+      "meaning": "Therapy；治療 【じりょう】",
+      "id": 165
+    },
+    {
+      "japanese": "丁度",
+      "hiragana": "丁度",
+      "meaning": "exactly; precisely; just; right; opportunely; fortunately；just (like); as if; as though",
+      "id": 166
+    },
+    {
+      "japanese": "平均",
+      "hiragana": "へいきん",
+      "meaning": "average; mean；balance; equilibrium",
+      "id": 167
+    },
+    {
+      "japanese": "暴動",
+      "hiragana": "ぼうどう",
+      "meaning": "insurrection; riot; uprising; rebellion; revolt；Riot",
+      "id": 168
+    },
+    {
+      "japanese": "政策",
+      "hiragana": "せいさく",
+      "meaning": "political measures; policy；Policy",
+      "id": 169
+    },
+    {
+      "japanese": "冠",
+      "hiragana": "かんむり",
+      "meaning": "traditional cap worn by Shinto clergy and courtiers；crown; diadem; coronet",
+      "id": 170
+    },
+    {
+      "japanese": "大事",
+      "hiragana": "だいじ",
+      "meaning": "important; serious; crucial；valuable; precious",
+      "id": 171
+    },
+    {
+      "japanese": "偏見",
+      "hiragana": "へんけん",
+      "meaning": "prejudice; bias; distorted view；Prejudice",
+      "id": 172
+    },
+    {
+      "japanese": "お巡りさん",
+      "hiragana": "まわ",
+      "meaning": "police officer",
+      "id": 173
+    },
+    {
+      "japanese": "地獄",
+      "hiragana": "じごく",
+      "meaning": "hell realm; Naraka；Hell",
+      "id": 174
+    },
+    {
+      "japanese": "水源",
+      "hiragana": "すいげん",
+      "meaning": "source of river; fountainhead；Suigen",
+      "id": 175
+    },
+    {
+      "japanese": "皇居",
+      "hiragana": "こうきょ",
+      "meaning": "Imperial Palace (of Japan); imperial residence；Koukyo",
+      "id": 176
+    },
+    {
+      "japanese": "商人",
+      "hiragana": "しょうにん",
+      "meaning": "merchant; trader; tradesman; dealer; shopkeeper；Akindo",
+      "id": 177
+    },
+    {
+      "japanese": "引き分け",
+      "hiragana": "ひわ",
+      "meaning": "draw (in competition); tie game；Tie (draw)",
+      "id": 178
+    },
+    {
+      "japanese": "黄色",
+      "hiragana": "きいろ",
+      "meaning": "yellow; amber；Yellow",
+      "id": 179
+    },
+    {
+      "japanese": "倒産",
+      "hiragana": "とうさん",
+      "meaning": "Bankruptcy",
+      "id": 180
+    },
+    {
+      "japanese": "怒り",
+      "hiragana": "いか",
+      "meaning": "anger; rage; fury; wrath; indignation；Anger",
+      "id": 181
+    },
+    {
+      "japanese": "何時も",
+      "hiragana": "いつ",
+      "meaning": "always; all the time; at all times；never",
+      "id": 182
+    },
+    {
+      "japanese": "塩",
+      "hiragana": "しお",
+      "meaning": "salt; common salt; table salt; sodium chloride；hardship; toil; trouble",
+      "id": 183
+    },
+    {
+      "japanese": "決まる",
+      "hiragana": "き",
+      "meaning": "to be decided; to be settled; to be fixed; to be arranged；to be unchanging; to be the same (as always); to be fixed; to be set",
+      "id": 184
+    },
+    {
+      "japanese": "絨毯",
+      "hiragana": "じゅうたん",
+      "meaning": "carpet; rug; runner；Carpet",
+      "id": 185
+    },
+    {
+      "japanese": "殺人",
+      "hiragana": "さつじん",
+      "meaning": "murder; homicide; manslaughter；Murder",
+      "id": 186
+    },
+    {
+      "japanese": "美味しい",
+      "hiragana": "おい",
+      "meaning": "good(-tasting); nice; delicious; tasty；attractive (offer, opportunity, etc.); appealing; convenient; favorable; desirable; profitable",
+      "id": 187
+    },
+    {
+      "japanese": "企画",
+      "hiragana": "きかく",
+      "meaning": "planning; plan; project; arrangements；Planning",
+      "id": 188
+    },
+    {
+      "japanese": "報酬",
+      "hiragana": "ほうしゅう",
+      "meaning": "remuneration; recompense; reward; toll；Remuneration",
+      "id": 189
+    },
+    {
+      "japanese": "民族",
+      "hiragana": "みんぞく",
+      "meaning": "people; race; nation; ethnic group; ethnos；Ethnic group",
+      "id": 190
+    },
+    {
+      "japanese": "証言",
+      "hiragana": "しょうげん",
+      "meaning": "testimony; (verbal) evidence；Testimony",
+      "id": 191
+    },
+    {
+      "japanese": "可愛い",
+      "hiragana": "可愛",
+      "meaning": "cute; adorable; charming; lovely; pretty；dear; precious; darling; pet",
+      "id": 192
+    },
+    {
+      "japanese": "古代",
+      "hiragana": "こだい",
+      "meaning": "ancient times; distant past; antiquity；Ancient history",
+      "id": 193
+    },
+    {
+      "japanese": "始め",
+      "hiragana": "はじ",
+      "meaning": "beginning; start; outset; opening；first (in line, etc.)",
+      "id": 194
+    },
+    {
+      "japanese": "助言",
+      "hiragana": "じょげん",
+      "meaning": "advice; counsel; suggestion; tip; hint；Advice (constitutional)",
+      "id": 195
+    },
+    {
+      "japanese": "沢山",
+      "hiragana": "たくさん",
+      "meaning": "a lot; lots; plenty; many; a large number; much; a great deal; a good deal；enough; sufficient",
+      "id": 196
+    },
+    {
+      "japanese": "階",
+      "hiragana": "かい",
+      "meaning": "storey; story; floor；stairs",
+      "id": 197
+    },
+    {
+      "japanese": "規制",
+      "hiragana": "きせい",
+      "meaning": "regulation; (traffic) policing; control; restriction；Regulation",
+      "id": 198
+    },
+    {
+      "japanese": "行く",
+      "hiragana": "い",
+      "meaning": "to go; to move (towards); to head (towards); to leave (for)；to move through; to travel across; to walk along (e.g. a road)",
+      "id": 199
     }
-] 
+  ]

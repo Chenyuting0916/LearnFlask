@@ -20,7 +20,10 @@
                 <button id="nextWord">下一個單字</button>
                 <button id="refreshVocab">重新載入單字庫</button>
             </div>
-            <div id="loading" class="loading">正在更新單字庫...</div>
+            <div id="loading" class="loading">
+                <div class="spinner"></div>
+                <div class="loading-text">正在更新單字庫...</div>
+            </div>
             <div class="progress">
                 已學習：<span id="learnedCount">{{ learned_words|length }}</span> / <span id="totalCount">{{ vocabulary|length }}</span>
             </div>

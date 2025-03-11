@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Tuple
 from app.models.vocabulary import Word
 from app.services.jisho_service import JishoService
 from app.utils.cache import Cache
@@ -46,16 +46,22 @@ class VocabularyService:
     def refresh(self) -> int:
         """重新從網路加載詞彙"""
         words = self._jisho_service.fetch_n1_words()
+        
         if not words:
+            # 如果抓取失敗，嘗試使用現有的快取
+            cached_words = self._cache.load('vocabulary.json')
+            if cached_words:
+                self.vocabulary = [Word(**word) for word in cached_words]
+                self.learned_words = []
+                return len(self.vocabulary)
+            
+            # 如果沒有快取，使用默認詞彙
             words = self._load_default_vocabulary()
-            
-        # 隨機打亂單字順序
-        random.shuffle(words)
-            
+        
         # 設置正確的ID
         for i, word in enumerate(words):
             word.id = i
-            
+        
         self.vocabulary = words
         self.learned_words = []  # 重置已學習的單字
         self._cache.save([vars(word) for word in words], 'vocabulary.json')

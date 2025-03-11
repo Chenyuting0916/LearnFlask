@@ -13,6 +13,7 @@ class Config:
     
     # Jisho.org 配置
     JISHO_USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-    JISHO_TIMEOUT = 10
+    JISHO_TIMEOUT = 10  # 單一請求超時時間（秒）
+    FETCH_TIMEOUT = 3   # 整體抓取超時時間（秒）
     MAX_WORDS = 200
     MAX_PAGES = 20 

@@ -3,6 +3,7 @@ from bs4 import BeautifulSoup
 from typing import List, Optional
 from app.models.vocabulary import Word
 from config.settings import Config
+import random
 
 class JishoService:
     """Jisho.org 網站爬蟲服務"""
@@ -12,17 +13,45 @@ class JishoService:
     
     def fetch_n1_words(self, max_words: int = Config.MAX_WORDS) -> List[Word]:
         """從 Jisho.org 獲取 N1 詞彙"""
-        words = []
-        page = 1
+        all_words = []
+        total_pages = self._get_total_pages()
         
-        while len(words) < max_words and page <= Config.MAX_PAGES:
+        # 隨機選擇要抓取的頁面
+        available_pages = list(range(1, total_pages + 1))
+        random.shuffle(available_pages)
+        target_pages = available_pages[:Config.MAX_PAGES]
+        
+        print(f"開始從 Jisho.org 抓取單字...")
+        print(f"找到總共 {total_pages} 頁，將隨機抓取 {len(target_pages)} 頁")
+        
+        for page in target_pages:
+            print(f"正在抓取第 {page} 頁...")
             new_words = self._fetch_page(page)
-            if not new_words:
-                break
-            words.extend(new_words)
-            page += 1
+            if new_words:
+                all_words.extend(new_words)
+                print(f"目前已抓取 {len(all_words)} 個單字")
             
-        return words[:max_words]
+        # 如果抓到的單字超過需要的數量，隨機選擇所需數量的單字
+        if len(all_words) > max_words:
+            all_words = random.sample(all_words, max_words)
+            
+        print(f"抓取完成！共獲得 {len(all_words)} 個單字")
+        return all_words
+    
+    def _get_total_pages(self) -> int:
+        """獲取總頁數"""
+        try:
+            url = "https://jisho.org/search/%23jlpt-n1%20%23words"
+            response = requests.get(url, headers=self.headers, timeout=Config.JISHO_TIMEOUT)
+            response.raise_for_status()
+            soup = BeautifulSoup(response.text, 'lxml')
+            
+            # 找到最後一頁的連結
+            last_page = soup.select('div.pagination a')[-2].text.strip()
+            return int(last_page)
+        except Exception as e:
+            print(f"Error getting total pages: {e}")
+            return Config.MAX_PAGES
     
     def _fetch_page(self, page: int) -> List[Word]:
         """獲取單一頁面的詞彙"""

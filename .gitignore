@@ -31,8 +31,8 @@ static/js/
 *.js.map
 
 # IDE
-.vscode/
 .idea/
+.vscode/
 *.swp
 *.swo
 
@@ -41,7 +41,10 @@ static/js/
 Thumbs.db
 
 # Application specific
-n1_vocabulary_cache.json
+cache/
+*.cache
+vocabulary.json
+learned_words.json
 
 # Environment variables
 .env 
