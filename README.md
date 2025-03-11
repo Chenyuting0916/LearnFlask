@@ -1,32 +1,52 @@
-# Simple Flask Application
+# Japanese Vocabulary Learning App 日本語単語学習アプリ 日語單字學習應用
 
-A basic Flask web application template.
+A web application to help you learn Japanese JLPT N1 vocabulary. The app automatically fetches words from Jisho.org and provides an interactive interface for learning.
 
-## Setup
+## Features 機能 功能
 
-1. Create a virtual environment:
+- 🔄 Automatically fetches JLPT N1 vocabulary from Jisho.org
+- 📝 Shows Japanese words with their readings and meanings
+- ✅ Tracks learned words
+- 🎯 Focuses on 50 words at a time for effective learning
+- 🔍 Random word selection from different pages for variety
+- 💾 Caches vocabulary for offline access
+
+## Setup 設定 設置
+
+1. Clone the repository:
+```bash
+git clone [your-repository-url]
+cd [repository-name]
+```
+
+2. Create and activate virtual environment:
 ```bash
 python -m venv venv
-```
-
-2. Activate the virtual environment:
-- Windows:
-```bash
-venv\Scripts\activate
-```
-- Unix/MacOS:
-```bash
+# Windows
+.\venv\Scripts\activate
+# Unix/MacOS
 source venv/bin/activate
 ```
 
 3. Install dependencies:
 ```bash
 pip install -r requirements.txt
+npm install  # For TypeScript compilation
 ```
 
 4. Run the application:
 ```bash
-python app.py
+python run.py
 ```
 
-The application will be available at http://127.0.0.1:5000/ 
+5. Open your browser and navigate to:
+```
+http://localhost:5000
+```
+
+## Usage 使用方法 使用方式
+
+1. Click "Show Meaning" to reveal the meaning of the current word
+2. Click "Next Word" to move to the next word
+3. Click "Update Words" to fetch 50 new words from Jisho.org
+4. Previously learned words are displayed below
