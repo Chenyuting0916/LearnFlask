@@ -1,0 +1,62 @@
+[
+    {
+        "japanese": "言葉",
+        "hiragana": "ことば",
+        "meaning": "單字；語言",
+        "id": 0
+    },
+    {
+        "japanese": "勉強",
+        "hiragana": "べんきょう",
+        "meaning": "學習；研究",
+        "id": 1
+    },
+    {
+        "japanese": "頑張る",
+        "hiragana": "がんばる",
+        "meaning": "加油；努力",
+        "id": 2
+    },
+    {
+        "japanese": "理解",
+        "hiragana": "りかい",
+        "meaning": "理解；明白",
+        "id": 3
+    },
+    {
+        "japanese": "記憶",
+        "hiragana": "きおく",
+        "meaning": "記憶；回憶",
+        "id": 4
+    },
+    {
+        "japanese": "実現",
+        "hiragana": "じつげん",
+        "meaning": "實現；達成",
+        "id": 5
+    },
+    {
+        "japanese": "経験",
+        "hiragana": "けいけん",
+        "meaning": "經驗；體驗",
+        "id": 6
+    },
+    {
+        "japanese": "成功",
+        "hiragana": "せいこう",
+        "meaning": "成功；成就",
+        "id": 7
+    },
+    {
+        "japanese": "失敗",
+        "hiragana": "しっぱい",
+        "meaning": "失敗；錯誤",
+        "id": 8
+    },
+    {
+        "japanese": "努力",
+        "hiragana": "どりょく",
+        "meaning": "努力；盡力",
+        "id": 9
+    }
+] 

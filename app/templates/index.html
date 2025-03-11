@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>日本語N1単語学習</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="main-container">
+        <div class="study-container">
+            <h1>日本語N1単語学習</h1>
+            <div class="card">
+                <div class="japanese">{{ word.japanese }}</div>
+                <div class="hiragana">{{ word.hiragana }}</div>
+                <div class="meaning" id="meaning">{{ word.meaning }}</div>
+            </div>
+            <div class="button-group">
+                <button id="showMeaning">顯示含義</button>
+                <button id="nextWord">下一個單字</button>
+                <button id="refreshVocab">重新載入單字庫</button>
+            </div>
+            <div id="loading" class="loading">正在更新單字庫...</div>
+            <div class="progress">
+                已學習：<span id="learnedCount">{{ learned_words|length }}</span> / <span id="totalCount">{{ vocabulary|length }}</span>
+            </div>
+        </div>
+        
+        <div class="learned-container">
+            <h2>已學習單字</h2>
+            <div id="learnedWords">
+                {% for word in learned_words %}
+                <div class="learned-word">
+                    <div class="japanese">{{ word.japanese }}</div>
+                    <div class="hiragana">{{ word.hiragana }}</div>
+                    <div class="meaning">{{ word.meaning }}</div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html> 
