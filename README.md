@@ -1,4 +1,4 @@
-# Japanese Vocabulary Learning App 日本語単語学習アプリ 日語單字學習應用
+# Japanese Vocabulary Learning Website
 
 A web application to help you learn Japanese JLPT N1 vocabulary. The app automatically fetches words from Jisho.org and provides an interactive interface for learning.
 
