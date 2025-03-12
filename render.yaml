@@ -1,9 +1,9 @@
 services:
   - type: web
-    name: learn-flask
+    name: learn-flask-app
     env: python
     buildCommand: pip install -r requirements.txt
-    startCommand: python app.py
+    startCommand: gunicorn app:app
     envVars:
       - key: PYTHON_VERSION
-        value: 3.11.0
+        value: 3.10.0
