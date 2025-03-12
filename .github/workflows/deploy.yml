@@ -22,5 +22,13 @@ jobs:
           
       - name: Deploy to PythonAnywhere
         run: |
+          # 使用 API 重新加載應用
           curl -X POST https://www.pythonanywhere.com/api/v0/user/${{ secrets.PA_USERNAME }}/webapps/${{ secrets.PA_USERNAME }}.pythonanywhere.com/reload/ \
+            -H "Authorization: Token ${{ secrets.PA_API_TOKEN }}"
+          
+          # 等待幾秒確保重新加載完成
+          sleep 5
+          
+          # 檢查應用狀態
+          curl -X GET https://www.pythonanywhere.com/api/v0/user/${{ secrets.PA_USERNAME }}/webapps/${{ secrets.PA_USERNAME }}.pythonanywhere.com/ \
             -H "Authorization: Token ${{ secrets.PA_API_TOKEN }}"
