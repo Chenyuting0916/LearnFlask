@@ -22,16 +22,24 @@ jobs:
           
       - name: Deploy to PythonAnywhere
         run: |
-          # 上傳所有改動的文件到 PythonAnywhere
-          for file in $(git diff --name-only HEAD~1 HEAD); do
-            if [ -f "$file" ]; then
-              echo "Uploading $file..."
-              curl -X POST "https://www.pythonanywhere.com/api/v0/user/${{ secrets.PA_USERNAME }}/files/path/home/${{ secrets.PA_USERNAME }}/learnflask/$file" \
-                -H "Authorization: Token ${{ secrets.PA_API_TOKEN }}" \
-                -F "content=@$file" \
-                -F "path=/home/${{ secrets.PA_USERNAME }}/learnflask/$file"
-            fi
+          # 創建一個臨時目錄來存放要上傳的文件
+          mkdir -p deploy_files
+          
+          # 複製所有需要上傳的文件
+          cp -r app.py requirements.txt app/ deploy_files/
+          
+          # 上傳所有文件到 PythonAnywhere
+          for file in $(find deploy_files -type f); do
+            relative_path=${file#deploy_files/}
+            echo "Uploading $relative_path..."
+            curl -X POST "https://www.pythonanywhere.com/api/v0/user/${{ secrets.PA_USERNAME }}/files/path/home/${{ secrets.PA_USERNAME }}/learnflask/$relative_path" \
+              -H "Authorization: Token ${{ secrets.PA_API_TOKEN }}" \
+              -F "content=@$file" \
+              -F "path=/home/${{ secrets.PA_USERNAME }}/learnflask/$relative_path"
           done
+          
+          # 清理臨時目錄
+          rm -rf deploy_files
           
           # 重新加載應用
           curl -X POST https://www.pythonanywhere.com/api/v0/user/${{ secrets.PA_USERNAME }}/webapps/${{ secrets.PA_USERNAME }}.pythonanywhere.com/reload/ \
