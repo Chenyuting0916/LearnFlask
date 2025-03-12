@@ -35,4 +35,10 @@ jobs:
             git pull
             source venv/bin/activate
             pip install -r requirements.txt
+            # 重新加載 Web 應用
             touch /var/www/${{ secrets.PA_USERNAME }}_pythonanywhere_com_wsgi.py
+            # 檢查日誌
+            echo "Checking error logs..."
+            tail -n 50 /var/log/${{ secrets.PA_USERNAME }}.pythonanywhere.com.error.log
+            echo "Checking server logs..."
+            tail -n 50 /var/log/${{ secrets.PA_USERNAME }}.pythonanywhere.com.server.log
