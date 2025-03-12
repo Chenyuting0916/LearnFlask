@@ -20,13 +20,16 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.PA_SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.PA_HOST }} >> ~/.ssh/known_hosts
+          
       - name: Deploy to PythonAnywhere
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.PA_HOST }}
-          username: ${{ secrets.PA_USERNAME }}
-          key: ${{ secrets.PA_SSH_KEY }}
-          script: |
+        run: |
+          ssh ${{ secrets.PA_USERNAME }}@${{ secrets.PA_HOST }} '
             cd ~/learnflask
             git pull
             source venv/bin/activate
@@ -38,3 +41,4 @@ jobs:
             tail -n 50 /var/log/${{ secrets.PA_USERNAME }}.pythonanywhere.com.error.log
             echo "Checking server logs..."
             tail -n 50 /var/log/${{ secrets.PA_USERNAME }}.pythonanywhere.com.server.log
+          '
