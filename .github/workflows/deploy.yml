@@ -20,25 +20,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           
-      - name: Setup SSH
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.PA_SSH_KEY }}" | base64 -d > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H ${{ secrets.PA_HOST }} >> ~/.ssh/known_hosts
-          
       - name: Deploy to PythonAnywhere
         run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.PA_USERNAME }}@${{ secrets.PA_HOST }} '
-            cd ~/learnflask
-            git pull
-            source venv/bin/activate
-            pip install -r requirements.txt
-            # 重新加載 Web 應用
-            touch /var/www/${{ secrets.PA_USERNAME }}_pythonanywhere_com_wsgi.py
-            # 檢查日誌
-            echo "Checking error logs..."
-            tail -n 50 /var/log/${{ secrets.PA_USERNAME }}.pythonanywhere.com.error.log
-            echo "Checking server logs..."
-            tail -n 50 /var/log/${{ secrets.PA_USERNAME }}.pythonanywhere.com.server.log
-          '
+          curl -X POST https://www.pythonanywhere.com/api/v0/user/${{ secrets.PA_USERNAME }}/webapps/${{ secrets.PA_USERNAME }}.pythonanywhere.com/reload/ \
+            -H "Authorization: Token ${{ secrets.PA_API_TOKEN }}"
