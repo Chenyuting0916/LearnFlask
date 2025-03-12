@@ -22,7 +22,18 @@ jobs:
           
       - name: Deploy to PythonAnywhere
         run: |
-          # 使用 API 重新加載應用
+          # 上傳所有改動的文件到 PythonAnywhere
+          for file in $(git diff --name-only HEAD~1 HEAD); do
+            if [ -f "$file" ]; then
+              echo "Uploading $file..."
+              curl -X POST "https://www.pythonanywhere.com/api/v0/user/${{ secrets.PA_USERNAME }}/files/path/home/${{ secrets.PA_USERNAME }}/learnflask/$file" \
+                -H "Authorization: Token ${{ secrets.PA_API_TOKEN }}" \
+                -F "content=@$file" \
+                -F "path=/home/${{ secrets.PA_USERNAME }}/learnflask/$file"
+            fi
+          done
+          
+          # 重新加載應用
           curl -X POST https://www.pythonanywhere.com/api/v0/user/${{ secrets.PA_USERNAME }}/webapps/${{ secrets.PA_USERNAME }}.pythonanywhere.com/reload/ \
             -H "Authorization: Token ${{ secrets.PA_API_TOKEN }}"
           
