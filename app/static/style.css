@@ -213,4 +213,107 @@ button:active {
     border-bottom: 2px solid #4CAF50;
     display: inline-block;
     position: relative;
-} 
+}
+
+/* 添加 RWD 媒體查詢 */
+@media screen and (max-width: 768px) {
+    .main-container {
+        flex-direction: column;
+        width: 95%;
+        margin: 1rem auto;
+        gap: 1rem;
+    }
+
+    .study-container {
+        padding: 1rem;
+    }
+
+    .learned-container {
+        height: 400px;
+        padding: 1rem;
+    }
+
+    .japanese {
+        font-size: 2em;
+    }
+
+    .hiragana {
+        font-size: 1.2em;
+    }
+
+    .meaning {
+        font-size: 1.5em;
+    }
+
+    .button-group {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    button {
+        width: 100%;
+        padding: 12px;
+        font-size: 1.1em;
+    }
+
+    .study-container h1 {
+        font-size: 1.5em;
+        margin: 1rem auto 2rem;
+    }
+
+    .learned-word .japanese {
+        font-size: 1.1em;
+    }
+
+    .learned-word .hiragana {
+        font-size: 0.8em;
+    }
+
+    .learned-word .meaning {
+        font-size: 0.9em;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .main-container {
+        width: 100%;
+        margin: 0;
+    }
+
+    .study-container, .learned-container {
+        border-radius: 0;
+        box-shadow: none;
+    }
+
+    .japanese {
+        font-size: 1.8em;
+    }
+
+    .hiragana {
+        font-size: 1.1em;
+    }
+
+    .meaning {
+        font-size: 1.3em;
+    }
+
+    .card {
+        margin: 10px 0;
+        padding: 15px;
+    }
+
+    .progress {
+        font-size: 0.9em;
+    }
+}
+
+/* 添加觸控優化 */
+@media (hover: none) {
+    button:active {
+        transform: scale(0.98);
+    }
+
+    .learned-word:active {
+        background-color: #f0f0f0;
+    }
+}
