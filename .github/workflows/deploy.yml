@@ -25,8 +25,28 @@ jobs:
           # 創建一個臨時目錄來存放要上傳的文件
           mkdir -p deploy_files
           
-          # 複製所有需要上傳的文件
-          cp -r app.py requirements.txt app/ deploy_files/
+          # 複製所有需要上傳的文件，包括app及其所有子目錄
+          cp -r app.py requirements.txt app config cache deploy_files/
+          
+          # 列出要上傳的所有文件，確保它們都存在
+          echo "Files to be uploaded:"
+          find deploy_files -type f | sort
+          
+          # 先建立所有必要的目錄
+          # 創建主項目目錄
+          echo "Creating main project directory..."
+          curl -X POST "https://www.pythonanywhere.com/api/v0/user/${{ secrets.PA_USERNAME }}/files/path/home/${{ secrets.PA_USERNAME }}/learnflask/" \
+            -H "Authorization: Token ${{ secrets.PA_API_TOKEN }}" || true
+          
+          # 提取所有需要的目錄
+          for dir in $(find deploy_files -type d); do
+            if [ "$dir" != "deploy_files" ]; then
+              relative_dir=${dir#deploy_files/}
+              echo "Creating directory: /home/${{ secrets.PA_USERNAME }}/learnflask/$relative_dir"
+              curl -X POST "https://www.pythonanywhere.com/api/v0/user/${{ secrets.PA_USERNAME }}/files/path/home/${{ secrets.PA_USERNAME }}/learnflask/$relative_dir/" \
+                -H "Authorization: Token ${{ secrets.PA_API_TOKEN }}" || true
+            fi
+          done
           
           # 上傳所有文件到 PythonAnywhere
           for file in $(find deploy_files -type f); do
