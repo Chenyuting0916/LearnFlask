@@ -1,5 +1,5 @@
 import random
-from flask import Blueprint, render_template, jsonify, session
+from flask import Blueprint, render_template, jsonify, session, redirect, url_for
 from app.services.vocabulary_service import VocabularyService
 
 bp = Blueprint('vocabulary', __name__)
@@ -8,15 +8,8 @@ current_word_index = 0
 
 @bp.route('/')
 def home():
-    """首頁路由"""
-    global current_word_index
-    word = vocabulary_service.get_word(current_word_index)
-    learned_words = vocabulary_service.get_learned_words()
-    
-    return render_template('index.html',
-                         word=word,
-                         learned_words=learned_words,
-                         vocabulary=vocabulary_service.vocabulary)
+    """首頁路由 - 重定向到日語詞彙頁面"""
+    return redirect(url_for('japanese.n1_vocabulary'))
 
 @bp.route('/next')
 def next_word():
