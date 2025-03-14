@@ -19,6 +19,25 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+      
+      - name: Create file list for deployment
+        run: |
+          # 創建一個包含所有需要上傳文件的列表
+          echo "建立部署文件列表..."
+          
+          # 先列出所有文件
+          find . -type f | sort > all_files.txt
+          
+          # 排除不需要上傳的文件和目錄
+          grep -v "^\./\.git/" all_files.txt | \
+          grep -v "^\./cache/" | \
+          grep -v "^\./app/data/" | \
+          grep -v "^\./venv/" | \
+          grep -v "^\./\." | \
+          grep -v "all_files.txt" > deploy_files.txt
+          
+          # 顯示將部署的文件數量
+          echo "將部署 $(wc -l < deploy_files.txt) 個文件"
           
       - name: Deploy to PythonAnywhere
         run: |
@@ -28,83 +47,63 @@ jobs:
           API_BASE="https://www.pythonanywhere.com/api/v0/user/${{ secrets.PA_USERNAME }}"
           
           # 確保基本目錄存在
-          echo "Creating base project directory..."
-          curl -X POST "$API_BASE/files/path$BASE_DIR/" -H "Authorization: Token $API_TOKEN" || true
+          echo "創建項目根目錄..."
+          curl -X POST "$API_BASE/files/path$BASE_DIR/" \
+            -H "Authorization: Token $API_TOKEN" || true
           
-          # 創建必要的目錄結構
-          echo "Creating essential directories..."
-          for dir in app app/templates app/templates/japanese app/templates/auth app/static app/routes app/services app/models app/utils config; do
-            echo "Creating directory: $BASE_DIR/$dir"
-            curl -X POST "$API_BASE/files/path$BASE_DIR/$dir/" -H "Authorization: Token $API_TOKEN" || true
-          done
-          
-          # 只創建數據和緩存目錄，但不上傳其內容
-          echo "Creating data and cache directories (without uploading their contents)..."
-          for dir in app/data cache; do
-            echo "Creating directory: $BASE_DIR/$dir"
-            curl -X POST "$API_BASE/files/path$BASE_DIR/$dir/" -H "Authorization: Token $API_TOKEN" || true
-          done
-          
-          # 上傳所有文件 - 使用更直接的方法
-          echo "Uploading all project files..."
-          
-          # 上傳主要 Python 文件
-          echo "Uploading app.py..."
-          curl -X POST "$API_BASE/files/path$BASE_DIR/app.py" \
-            -H "Authorization: Token $API_TOKEN" \
-            -F "content=@app.py" \
-            -F "path=$BASE_DIR/app.py"
+          # 第一步：找出所有需要創建的目錄
+          echo "創建所有必要的目錄..."
+          cat deploy_files.txt | xargs -I{} dirname {} | sort | uniq | while read dir; do
+            # 跳過當前目錄
+            if [ "$dir" = "." ]; then
+              continue
+            fi
             
-          echo "Uploading requirements.txt..."
-          curl -X POST "$API_BASE/files/path$BASE_DIR/requirements.txt" \
-            -H "Authorization: Token $API_TOKEN" \
-            -F "content=@requirements.txt" \
-            -F "path=$BASE_DIR/requirements.txt"
-          
-          # 遞迴上傳 app 目錄中的所有 .py 文件，但排除 data 目錄
-          find app -type f -name "*.py" | grep -v "app/data/" | while read file; do
-            target_path="$BASE_DIR/$file"
-            echo "Uploading $file to $target_path"
-            curl -X POST "$API_BASE/files/path$target_path" \
-              -H "Authorization: Token $API_TOKEN" \
-              -F "content=@$file" \
-              -F "path=$target_path"
+            # 把相對路徑轉為 PythonAnywhere 上的絕對路徑
+            remote_dir="$BASE_DIR/${dir#./}"
+            echo "創建目錄: $remote_dir"
+            
+            # 創建目錄
+            curl -X POST "$API_BASE/files/path$remote_dir/" \
+              -H "Authorization: Token $API_TOKEN" || true
           done
           
-          # 遞迴上傳 app/templates 目錄中的所有 .html 文件
-          find app/templates -type f -name "*.html" | while read file; do
-            target_path="$BASE_DIR/$file"
-            echo "Uploading $file to $target_path"
-            curl -X POST "$API_BASE/files/path$target_path" \
-              -H "Authorization: Token $API_TOKEN" \
-              -F "content=@$file" \
-              -F "path=$target_path"
+          # 第二步：創建 data 和 cache 目錄，但不上傳其內容
+          echo "創建 data 和 cache 目錄..."
+          for dir in app/data cache; do
+            remote_dir="$BASE_DIR/$dir"
+            echo "創建目錄: $remote_dir"
+            curl -X POST "$API_BASE/files/path$remote_dir/" \
+              -H "Authorization: Token $API_TOKEN" || true
           done
           
-          # 遞迴上傳 app/static 目錄中的所有文件
-          find app/static -type f | while read file; do
-            target_path="$BASE_DIR/$file"
-            echo "Uploading $file to $target_path"
-            curl -X POST "$API_BASE/files/path$target_path" \
+          # 第三步：上傳所有需要部署的文件
+          echo "上傳所有文件..."
+          cat deploy_files.txt | while read file; do
+            # 把相對路徑轉為 PythonAnywhere 上的絕對路徑
+            remote_file="$BASE_DIR/${file#./}"
+            echo "上傳文件: $file -> $remote_file"
+            
+            # 上傳文件
+            curl -X POST "$API_BASE/files/path$remote_file" \
               -H "Authorization: Token $API_TOKEN" \
               -F "content=@$file" \
-              -F "path=$target_path"
+              -F "path=$remote_file"
           done
           
-          # 遞迴上傳 config 目錄中的所有 .py 文件
-          find config -type f -name "*.py" | while read file; do
-            target_path="$BASE_DIR/$file"
-            echo "Uploading $file to $target_path"
-            curl -X POST "$API_BASE/files/path$target_path" \
-              -H "Authorization: Token $API_TOKEN" \
-              -F "content=@$file" \
-              -F "path=$target_path"
+          # 第四步：驗證關鍵目錄的內容
+          echo "驗證部署..."
+          for dir in app/templates app/templates/japanese app/routes config; do
+            echo "列出 $dir 目錄內容:"
+            curl -sS "$API_BASE/files/path$BASE_DIR/$dir/" \
+              -H "Authorization: Token $API_TOKEN" || true
+            echo ""
           done
           
           # 重新加載應用
-          echo "Reloading the web application..."
+          echo "重新加載 Web 應用..."
           curl -X POST "$API_BASE/webapps/${{ secrets.PA_USERNAME }}.pythonanywhere.com/reload/" \
             -H "Authorization: Token $API_TOKEN"
             
-          echo "Deployment completed!"
+          echo "部署完成!"
 
