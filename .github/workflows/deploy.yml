@@ -22,56 +22,89 @@ jobs:
           
       - name: Deploy to PythonAnywhere
         run: |
-          # 創建一個臨時目錄來存放要上傳的文件
-          mkdir -p deploy_files
+          # 設定基本變量
+          BASE_DIR="/home/${{ secrets.PA_USERNAME }}/learnflask"
+          API_TOKEN="${{ secrets.PA_API_TOKEN }}"
+          API_BASE="https://www.pythonanywhere.com/api/v0/user/${{ secrets.PA_USERNAME }}"
           
-          # 複製所有需要上傳的文件，不包括不存在的目錄
-          cp -r app.py requirements.txt app config deploy_files/
+          # 確保基本目錄存在
+          echo "Creating base project directory..."
+          curl -X POST "$API_BASE/files/path$BASE_DIR/" -H "Authorization: Token $API_TOKEN" || true
           
-          # 列出要上傳的所有文件，確保它們都存在
-          echo "Files to be uploaded:"
-          find deploy_files -type f | sort
-          
-          # 先建立所有必要的目錄
-          # 創建主項目目錄
-          echo "Creating main project directory..."
-          curl -X POST "https://www.pythonanywhere.com/api/v0/user/${{ secrets.PA_USERNAME }}/files/path/home/${{ secrets.PA_USERNAME }}/learnflask/" \
-            -H "Authorization: Token ${{ secrets.PA_API_TOKEN }}" || true
-          
-          # 提取所有需要的目錄
-          for dir in $(find deploy_files -type d); do
-            if [ "$dir" != "deploy_files" ]; then
-              relative_dir=${dir#deploy_files/}
-              echo "Creating directory: /home/${{ secrets.PA_USERNAME }}/learnflask/$relative_dir"
-              curl -X POST "https://www.pythonanywhere.com/api/v0/user/${{ secrets.PA_USERNAME }}/files/path/home/${{ secrets.PA_USERNAME }}/learnflask/$relative_dir/" \
-                -H "Authorization: Token ${{ secrets.PA_API_TOKEN }}" || true
-            fi
+          # 創建必要的目錄結構
+          echo "Creating essential directories..."
+          for dir in app app/templates app/templates/japanese app/templates/auth app/static app/routes app/services app/models app/utils config; do
+            echo "Creating directory: $BASE_DIR/$dir"
+            curl -X POST "$API_BASE/files/path$BASE_DIR/$dir/" -H "Authorization: Token $API_TOKEN" || true
           done
           
-          # 確保 cache 目錄存在
-          echo "Creating cache directory..."
-          curl -X POST "https://www.pythonanywhere.com/api/v0/user/${{ secrets.PA_USERNAME }}/files/path/home/${{ secrets.PA_USERNAME }}/learnflask/cache/" \
-            -H "Authorization: Token ${{ secrets.PA_API_TOKEN }}" || true
+          # 只創建數據和緩存目錄，但不上傳其內容
+          echo "Creating data and cache directories (without uploading their contents)..."
+          for dir in app/data cache; do
+            echo "Creating directory: $BASE_DIR/$dir"
+            curl -X POST "$API_BASE/files/path$BASE_DIR/$dir/" -H "Authorization: Token $API_TOKEN" || true
+          done
+          
+          # 上傳所有文件 - 使用更直接的方法
+          echo "Uploading all project files..."
+          
+          # 上傳主要 Python 文件
+          echo "Uploading app.py..."
+          curl -X POST "$API_BASE/files/path$BASE_DIR/app.py" \
+            -H "Authorization: Token $API_TOKEN" \
+            -F "content=@app.py" \
+            -F "path=$BASE_DIR/app.py"
             
-          # 確保 app/data 目錄存在
-          echo "Creating app/data directory..."
-          curl -X POST "https://www.pythonanywhere.com/api/v0/user/${{ secrets.PA_USERNAME }}/files/path/home/${{ secrets.PA_USERNAME }}/learnflask/app/data/" \
-            -H "Authorization: Token ${{ secrets.PA_API_TOKEN }}" || true
+          echo "Uploading requirements.txt..."
+          curl -X POST "$API_BASE/files/path$BASE_DIR/requirements.txt" \
+            -H "Authorization: Token $API_TOKEN" \
+            -F "content=@requirements.txt" \
+            -F "path=$BASE_DIR/requirements.txt"
           
-          # 上傳所有文件到 PythonAnywhere
-          for file in $(find deploy_files -type f); do
-            relative_path=${file#deploy_files/}
-            echo "Uploading $relative_path..."
-            curl -X POST "https://www.pythonanywhere.com/api/v0/user/${{ secrets.PA_USERNAME }}/files/path/home/${{ secrets.PA_USERNAME }}/learnflask/$relative_path" \
-              -H "Authorization: Token ${{ secrets.PA_API_TOKEN }}" \
+          # 遞迴上傳 app 目錄中的所有 .py 文件，但排除 data 目錄
+          find app -type f -name "*.py" | grep -v "app/data/" | while read file; do
+            target_path="$BASE_DIR/$file"
+            echo "Uploading $file to $target_path"
+            curl -X POST "$API_BASE/files/path$target_path" \
+              -H "Authorization: Token $API_TOKEN" \
               -F "content=@$file" \
-              -F "path=/home/${{ secrets.PA_USERNAME }}/learnflask/$relative_path"
+              -F "path=$target_path"
           done
           
-          # 清理臨時目錄
-          rm -rf deploy_files
+          # 遞迴上傳 app/templates 目錄中的所有 .html 文件
+          find app/templates -type f -name "*.html" | while read file; do
+            target_path="$BASE_DIR/$file"
+            echo "Uploading $file to $target_path"
+            curl -X POST "$API_BASE/files/path$target_path" \
+              -H "Authorization: Token $API_TOKEN" \
+              -F "content=@$file" \
+              -F "path=$target_path"
+          done
+          
+          # 遞迴上傳 app/static 目錄中的所有文件
+          find app/static -type f | while read file; do
+            target_path="$BASE_DIR/$file"
+            echo "Uploading $file to $target_path"
+            curl -X POST "$API_BASE/files/path$target_path" \
+              -H "Authorization: Token $API_TOKEN" \
+              -F "content=@$file" \
+              -F "path=$target_path"
+          done
+          
+          # 遞迴上傳 config 目錄中的所有 .py 文件
+          find config -type f -name "*.py" | while read file; do
+            target_path="$BASE_DIR/$file"
+            echo "Uploading $file to $target_path"
+            curl -X POST "$API_BASE/files/path$target_path" \
+              -H "Authorization: Token $API_TOKEN" \
+              -F "content=@$file" \
+              -F "path=$target_path"
+          done
           
           # 重新加載應用
-          curl -X POST https://www.pythonanywhere.com/api/v0/user/${{ secrets.PA_USERNAME }}/webapps/${{ secrets.PA_USERNAME }}.pythonanywhere.com/reload/ \
-            -H "Authorization: Token ${{ secrets.PA_API_TOKEN }}"
+          echo "Reloading the web application..."
+          curl -X POST "$API_BASE/webapps/${{ secrets.PA_USERNAME }}.pythonanywhere.com/reload/" \
+            -H "Authorization: Token $API_TOKEN"
+            
+          echo "Deployment completed!"
 
