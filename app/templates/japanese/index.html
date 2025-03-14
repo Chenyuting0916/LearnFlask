@@ -1,0 +1,304 @@
+{% extends "layout.html" %}
+
+{% block title %}日語學習平台 - 首頁{% endblock %}
+
+{% block content %}
+<!-- 頂部橫幅 -->
+<div class="jumbotron bg-light p-5 rounded-3 mb-4">
+    <div class="container">
+        <h1 class="display-4">歡迎來到日語學習平台！</h1>
+        <p class="lead">在這裡，您可以系統地學習日語，從入門基礎到高級會話。</p>
+        {% if not user_id %}
+            <p>立即加入我們，開始您的日語學習之旅！</p>
+            <div class="mt-4">
+                <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-lg me-2">免費註冊</a>
+                <a href="{{ url_for('auth.login') }}" class="btn btn-outline-primary btn-lg">登錄</a>
+            </div>
+        {% else %}
+            <p>繼續您的學習之旅！</p>
+            <div class="mt-4">
+                <a href="{{ url_for('japanese.lessons') }}" class="btn btn-primary btn-lg me-2">查看課程</a>
+                <a href="{{ url_for('japanese.quizzes') }}" class="btn btn-outline-primary btn-lg">參加測驗</a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- 特色區塊 -->
+<div class="row mb-5">
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-language fa-3x text-primary mb-3"></i>
+                <h3 class="card-title">假名學習</h3>
+                <p class="card-text">掌握平假名和片假名，日語學習的第一步。互動式練習和記憶技巧幫助您快速記住所有假名。</p>
+                <a href="{{ url_for('japanese.hiragana') }}" class="btn btn-outline-primary">開始學習</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-book fa-3x text-primary mb-3"></i>
+                <h3 class="card-title">詞彙擴展</h3>
+                <p class="card-text">通過主題分類學習常用日語詞彙。包含發音、例句和記憶技巧，幫助您輕鬆掌握實用詞彙。</p>
+                <a href="{{ url_for('japanese.vocabulary') }}" class="btn btn-outline-primary">詞彙列表</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-chalkboard-teacher fa-3x text-primary mb-3"></i>
+                <h3 class="card-title">結構化課程</h3>
+                <p class="card-text">從初級到高級的系統化課程。每個課程包含語法點、練習和應用場景，幫助您全面掌握日語。</p>
+                <a href="{{ url_for('japanese.lessons') }}" class="btn btn-outline-primary">瀏覽課程</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 訂閱方案 -->
+<div class="bg-light p-4 rounded-3 mb-5">
+    <h2 class="text-center mb-4">選擇適合您的學習方案</h2>
+    <div class="row">
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-header text-center bg-white">
+                    <h3>免費</h3>
+                </div>
+                <div class="card-body">
+                    <h4 class="card-title text-center mb-4">¥0 / 月</h4>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item">基礎假名學習</li>
+                        <li class="list-group-item">限量基礎詞彙</li>
+                        <li class="list-group-item">初級測驗</li>
+                        <li class="list-group-item text-muted">高級學習內容</li>
+                        <li class="list-group-item text-muted">發音反饋</li>
+                    </ul>
+                </div>
+                <div class="card-footer text-center bg-white">
+                    {% if not user_id %}
+                        <a href="{{ url_for('auth.register') }}" class="btn btn-outline-primary">註冊免費帳戶</a>
+                    {% else %}
+                        <button class="btn btn-outline-secondary" disabled>當前方案</button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 border-primary">
+                <div class="card-header text-center bg-primary text-white">
+                    <h3>基本會員</h3>
+                    <span class="badge bg-warning">熱門選擇</span>
+                </div>
+                <div class="card-body">
+                    <h4 class="card-title text-center mb-4">¥49.99 / 月</h4>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item">完整假名學習</li>
+                        <li class="list-group-item">2000+ 常用詞彙</li>
+                        <li class="list-group-item">所有等級測驗</li>
+                        <li class="list-group-item">基礎會話練習</li>
+                        <li class="list-group-item text-muted">個人化學習計劃</li>
+                    </ul>
+                </div>
+                <div class="card-footer text-center bg-white">
+                    {% if user_id and user_subscription == 'basic' %}
+                        <button class="btn btn-primary" disabled>當前方案</button>
+                    {% elif user_id %}
+                        <a href="{{ url_for('auth.payment', type='basic', months=1) }}" class="btn btn-primary">升級</a>
+                    {% else %}
+                        <a href="{{ url_for('auth.register') }}" class="btn btn-primary">選擇此方案</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-header text-center bg-warning text-dark">
+                    <h3>高級會員</h3>
+                </div>
+                <div class="card-body">
+                    <h4 class="card-title text-center mb-4">¥99.99 / 月</h4>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item">所有基本會員功能</li>
+                        <li class="list-group-item">5000+ 詞彙庫</li>
+                        <li class="list-group-item">專業發音反饋</li>
+                        <li class="list-group-item">JLPT考試準備</li>
+                        <li class="list-group-item">個人化學習計劃</li>
+                    </ul>
+                </div>
+                <div class="card-footer text-center bg-white">
+                    {% if user_id and user_subscription == 'premium' %}
+                        <button class="btn btn-warning" disabled>當前方案</button>
+                    {% elif user_id %}
+                        <a href="{{ url_for('auth.payment', type='premium', months=1) }}" class="btn btn-warning">升級</a>
+                    {% else %}
+                        <a href="{{ url_for('auth.register') }}" class="btn btn-warning">選擇此方案</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 學習路徑 -->
+<div class="mb-5">
+    <h2 class="text-center mb-4">日語學習路徑</h2>
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-marker bg-primary"></div>
+                    <div class="timeline-content">
+                        <h4>階段 1: 日語基礎</h4>
+                        <p>學習平假名和片假名，掌握基本問候語和日常用語。熟悉日語發音和基本語法。</p>
+                        <a href="{{ url_for('japanese.hiragana') }}" class="btn btn-sm btn-outline-primary">開始學習</a>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-marker bg-primary"></div>
+                    <div class="timeline-content">
+                        <h4>階段 2: 初級會話</h4>
+                        <p>學習基本句型和時態，擴展詞彙量。能夠進行簡單的日常會話，如購物、點餐等。</p>
+                        <a href="{{ url_for('japanese.lessons') }}?level=初級" class="btn btn-sm btn-outline-primary">查看課程</a>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-marker bg-primary"></div>
+                    <div class="timeline-content">
+                        <h4>階段 3: 中級日語</h4>
+                        <p>學習複雜語法結構，擴大詞彙量。能夠理解日常對話和簡單的日語材料。</p>
+                        <a href="{{ url_for('japanese.lessons') }}?level=中級" class="btn btn-sm btn-outline-primary">查看課程</a>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-marker bg-primary"></div>
+                    <div class="timeline-content">
+                        <h4>階段 4: 高級應用</h4>
+                        <p>掌握高級語法和書面語表達，能夠理解新聞、電視節目和文學作品。為JLPT N2-N1準備。</p>
+                        <a href="{{ url_for('japanese.lessons') }}?level=高級" class="btn btn-sm btn-outline-primary">查看課程</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 用戶評價 -->
+<div class="bg-light p-4 rounded-3 mb-5">
+    <h2 class="text-center mb-4">學員評價</h2>
+    <div class="row">
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <img src="https://via.placeholder.com/50" class="rounded-circle me-3" alt="用戶頭像">
+                        <div>
+                            <h5 class="mb-0">陳小明</h5>
+                            <div class="text-warning">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="card-text">"這個平台真的很棒！我從零基礎開始學習日語，在三個月內就能進行簡單對話了。課程設計非常系統化，學習過程非常有趣。"</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <img src="https://via.placeholder.com/50" class="rounded-circle me-3" alt="用戶頭像">
+                        <div>
+                            <h5 class="mb-0">林美玲</h5>
+                            <div class="text-warning">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star-half-alt"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="card-text">"我為了工作需要學習日語，高級會員方案幫助我在半年內通過了JLPT N3考試。教材和練習非常貼近實際應用場景，強烈推薦！"</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <img src="https://via.placeholder.com/50" class="rounded-circle me-3" alt="用戶頭像">
+                        <div>
+                            <h5 class="mb-0">王大偉</h5>
+                            <div class="text-warning">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="far fa-star"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="card-text">"平台的假名學習系統非常有效，讓我快速掌握了平假名和片假名。詞彙學習工具也很實用，尤其是配有真人發音，幫助我糾正發音問題。"</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 行動呼籲 -->
+<div class="text-center mb-5">
+    <h2 class="mb-3">立即開始您的日語學習之旅</h2>
+    <p class="lead mb-4">無論您是初學者還是想提高日語水平，我們都有適合您的課程和資源。</p>
+    {% if not user_id %}
+        <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-lg me-2">免費註冊</a>
+        <a href="{{ url_for('auth.login') }}" class="btn btn-outline-primary btn-lg">登錄</a>
+    {% else %}
+        <a href="{{ url_for('japanese.lessons') }}" class="btn btn-primary btn-lg">繼續學習</a>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* 時間線樣式 */
+    .timeline {
+        position: relative;
+        padding-left: 30px;
+    }
+    
+    .timeline::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 15px;
+        height: 100%;
+        width: 2px;
+        background-color: #dee2e6;
+    }
+    
+    .timeline-item {
+        position: relative;
+        margin-bottom: 30px;
+    }
+    
+    .timeline-marker {
+        position: absolute;
+        left: -30px;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        top: 5px;
+    }
+    
+    .timeline-content {
+        padding-bottom: 10px;
+    }
+</style>
+{% endblock %} 

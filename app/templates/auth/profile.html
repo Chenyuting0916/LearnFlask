@@ -1,0 +1,127 @@
+{% extends "layout.html" %}
+
+{% block title %}個人資料 - 日語學習平台{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="card-title mb-0">個人資料</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-4">
+                        <div class="col-md-4 text-center">
+                            <div class="profile-img-container mb-3">
+                                <img src="{{ url_for('static', filename='images/default-avatar.png') }}" alt="用戶頭像" class="img-fluid rounded-circle" style="width: 150px; height: 150px;">
+                            </div>
+                            <h4>{{ user.username }}</h4>
+                            <p class="text-muted">{{ user.subscription_type|capitalize }} 會員</p>
+                        </div>
+                        <div class="col-md-8">
+                            <h5 class="border-bottom pb-2 mb-3">個人信息</h5>
+                            <table class="table table-hover">
+                                <tbody>
+                                    <tr>
+                                        <th scope="row" width="30%">用戶名</th>
+                                        <td>{{ user.username }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">電子郵件</th>
+                                        <td>{{ user.email }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">註冊日期</th>
+                                        <td>{{ user.created_at|format_date }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">訂閱計劃</th>
+                                        <td>
+                                            <span class="badge {% if user.subscription_type == 'premium' %}bg-success{% elif user.subscription_type == 'basic' %}bg-primary{% else %}bg-secondary{% endif %}">
+                                                {{ user.subscription_type|capitalize }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">訂閱到期日</th>
+                                        <td>{{ user.subscription_end_date|format_date if user.subscription_end_date else '無限期' }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="d-flex justify-content-end">
+                                <a href="{{ url_for('auth.edit_profile') }}" class="btn btn-primary">
+                                    <i class="fas fa-edit me-1"></i> 編輯個人資料
+                                </a>
+                                <a href="{{ url_for('auth.subscription') }}" class="btn btn-success ms-2">
+                                    <i class="fas fa-star me-1"></i> 管理訂閱
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card mt-4">
+                <div class="card-header bg-info text-white">
+                    <h3 class="card-title mb-0">學習統計</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card mb-3">
+                                <div class="card-body text-center">
+                                    <h1 class="display-4">0</h1>
+                                    <p class="text-muted">已學習詞彙</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card mb-3">
+                                <div class="card-body text-center">
+                                    <h1 class="display-4">0</h1>
+                                    <p class="text-muted">已完成測驗</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card mt-4">
+                <div class="card-header bg-warning">
+                    <h3 class="card-title mb-0">收藏內容</h3>
+                </div>
+                <div class="card-body">
+                    <p class="text-center">您尚未收藏任何內容。</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .avatar-circle {
+        width: 100px;
+        height: 100px;
+        background-color: var(--primary-color);
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    
+    .avatar-text {
+        color: #fff;
+        font-size: 40px;
+        font-weight: bold;
+    }
+</style>
+{% endblock %} 

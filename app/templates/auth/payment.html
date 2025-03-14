@@ -1,0 +1,236 @@
+{% extends "layout.html" %}
+
+{% block title %}支付 - 日語學習平台{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow mb-5">
+                <div class="card-header bg-primary text-white py-3">
+                    <h2 class="mb-0 text-center">確認您的訂閱</h2>
+                </div>
+                <div class="card-body p-4">
+                    <!-- 訂閱摘要 -->
+                    <div class="subscription-summary mb-4">
+                        <h3 class="mb-3">訂閱摘要</h3>
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-7">
+                                        <h4>{{ subscription_type|capitalize }} 方案</h4>
+                                        <p class="text-muted mb-0">
+                                            {% if subscription_type == 'basic' %}
+                                                完整假名學習、2000+ 詞彙、所有測驗和中級課程
+                                            {% elif subscription_type == 'premium' %}
+                                                所有基本功能、5000+ 詞彙、高級課程和 JLPT 考試準備
+                                            {% endif %}
+                                        </p>
+                                    </div>
+                                    <div class="col-md-5 text-md-end mt-3 mt-md-0">
+                                        <h5 class="mb-1">
+                                            {% if subscription_type == 'basic' %}
+                                                ¥49.99 / 月
+                                            {% elif subscription_type == 'premium' %}
+                                                ¥99.99 / 月
+                                            {% endif %}
+                                        </h5>
+                                        <p class="mb-0">{{ months }} 個月訂閱</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 支付表單 -->
+                    <form method="post" action="{{ url_for('auth.payment') }}" id="payment-form">
+                        <input type="hidden" name="subscription_type" value="{{ subscription_type }}">
+                        <input type="hidden" name="months" value="{{ months }}">
+                        
+                        <!-- 訂閱時長選擇 -->
+                        <div class="mb-4">
+                            <h3>訂閱時長</h3>
+                            <div class="btn-group w-100" role="group">
+                                <a href="{{ url_for('auth.payment', type=subscription_type, months=1) }}" class="btn btn-outline-primary {% if months == 1 %}active{% endif %}">
+                                    1 個月
+                                </a>
+                                <a href="{{ url_for('auth.payment', type=subscription_type, months=3) }}" class="btn btn-outline-primary {% if months == 3 %}active{% endif %}">
+                                    3 個月 <span class="badge bg-success">節省 10%</span>
+                                </a>
+                                <a href="{{ url_for('auth.payment', type=subscription_type, months=12) }}" class="btn btn-outline-primary {% if months == 12 %}active{% endif %}">
+                                    12 個月 <span class="badge bg-success">節省 20%</span>
+                                </a>
+                            </div>
+                        </div>
+                        
+                        <!-- 支付信息 -->
+                        <div class="mb-4">
+                            <h3>支付信息</h3>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="cardName" class="form-label">持卡人姓名</label>
+                                    <input type="text" class="form-control" id="cardName" name="card_name" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="cardNumber" class="form-label">卡號</label>
+                                    <input type="text" class="form-control" id="cardNumber" name="card_number" placeholder="XXXX XXXX XXXX XXXX" required>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label for="expiryMonth" class="form-label">到期月份</label>
+                                    <select class="form-select" id="expiryMonth" name="expiry_month" required>
+                                        <option value="">月</option>
+                                        {% for month in range(1, 13) %}
+                                            <option value="{{ month }}">{{ '%02d' % month }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label for="expiryYear" class="form-label">到期年份</label>
+                                    <select class="form-select" id="expiryYear" name="expiry_year" required>
+                                        <option value="">年</option>
+                                        {% for year in range(2023, 2033) %}
+                                            <option value="{{ year }}">{{ year }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label for="cvv" class="form-label">CVV</label>
+                                    <input type="text" class="form-control" id="cvv" name="cvv" placeholder="XXX" required>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 支付方式選擇 -->
+                        <div class="mb-4">
+                            <h3>支付方式</h3>
+                            <div class="payment-methods">
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="radio" name="payment_method" id="creditCard" value="credit_card" checked>
+                                    <label class="form-check-label" for="creditCard">
+                                        <i class="fab fa-cc-visa me-2"></i>
+                                        <i class="fab fa-cc-mastercard me-2"></i>
+                                        <i class="fab fa-cc-amex me-2"></i>
+                                        信用卡
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="radio" name="payment_method" id="paypal" value="paypal">
+                                    <label class="form-check-label" for="paypal">
+                                        <i class="fab fa-paypal me-2"></i>
+                                        PayPal
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="radio" name="payment_method" id="alipay" value="alipay">
+                                    <label class="form-check-label" for="alipay">
+                                        <i class="fab fa-alipay me-2"></i>
+                                        支付寶
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="payment_method" id="wechat" value="wechat">
+                                    <label class="form-check-label" for="wechat">
+                                        <i class="fab fa-weixin me-2"></i>
+                                        微信支付
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 訂閱條款 -->
+                        <div class="mb-4">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="agreeTerms" name="agree_terms" required>
+                                <label class="form-check-label" for="agreeTerms">
+                                    我已閱讀並同意<a href="#">訂閱條款</a>和<a href="#">隱私政策</a>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <!-- 付款摘要 -->
+                        <div class="payment-summary bg-light p-3 rounded mb-4">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>{{ subscription_type|capitalize }} 方案 ({{ months }}個月)</span>
+                                <span>
+                                    {% if subscription_type == 'basic' %}
+                                        {% set base_price = 49.99 %}
+                                    {% elif subscription_type == 'premium' %}
+                                        {% set base_price = 99.99 %}
+                                    {% endif %}
+                                    
+                                    {% if months|int == 3 %}
+                                        {% set discount = 0.1 %}  <!-- 10% discount -->
+                                    {% elif months|int == 12 %}
+                                        {% set discount = 0.2 %}  <!-- 20% discount -->
+                                    {% else %}
+                                        {% set discount = 0 %}
+                                    {% endif %}
+                                    
+                                    ¥{{ (base_price * months|int * (1 - discount))|round(2) }}
+                                </span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>稅費</span>
+                                <span>¥0.00</span>
+                            </div>
+                            <hr>
+                            <div class="d-flex justify-content-between fw-bold">
+                                <span>總計</span>
+                                <span id="total-price">
+                                    ¥{{ (base_price * months|int * (1 - discount))|round(2) }}
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <!-- 提交按鈕 -->
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">確認支付</button>
+                            <a href="{{ url_for('auth.subscription') }}" class="btn btn-outline-secondary">返回</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- 安全提示 -->
+            <div class="text-center mb-5">
+                <p class="mb-1"><i class="fas fa-lock me-2"></i>所有支付通過 SSL 加密處理，您的信息安全受到保護。</p>
+                <p class="mb-0 text-muted">如果您有任何問題，請<a href="#">聯繫我們的客服團隊</a>。</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // 信用卡號格式化
+        const cardNumberInput = document.getElementById('cardNumber');
+        if (cardNumberInput) {
+            cardNumberInput.addEventListener('input', function(e) {
+                let value = e.target.value.replace(/\D/g, '');
+                if (value.length > 16) value = value.slice(0, 16);
+                
+                // 每4位數字後添加空格
+                let formattedValue = '';
+                for (let i = 0; i < value.length; i++) {
+                    if (i > 0 && i % 4 === 0) formattedValue += ' ';
+                    formattedValue += value[i];
+                }
+                
+                e.target.value = formattedValue;
+            });
+        }
+        
+        // CVV 格式化
+        const cvvInput = document.getElementById('cvv');
+        if (cvvInput) {
+            cvvInput.addEventListener('input', function(e) {
+                let value = e.target.value.replace(/\D/g, '');
+                if (value.length > 3) value = value.slice(0, 3);
+                e.target.value = value;
+            });
+        }
+    });
+</script>
+{% endblock %} 

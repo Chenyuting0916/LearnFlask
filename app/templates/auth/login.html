@@ -1,0 +1,43 @@
+{% extends "layout.html" %}
+
+{% block title %}登錄 - 日語學習平台{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white text-center py-3">
+                <h2>登錄</h2>
+            </div>
+            <div class="card-body p-4">
+                <form method="post" action="{{ url_for('auth.login') }}">
+                    <div class="mb-3">
+                        <label for="email" class="form-label">電子郵件</label>
+                        <input type="email" class="form-control" id="email" name="email" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">密碼</label>
+                        <input type="password" class="form-control" id="password" name="password" required>
+                    </div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="remember" name="remember">
+                        <label class="form-check-label" for="remember">記住我</label>
+                    </div>
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg">登錄</button>
+                    </div>
+                </form>
+            </div>
+            <div class="card-footer text-center py-3">
+                <p class="mb-0">還沒有帳戶？ <a href="{{ url_for('auth.register') }}">立即註冊</a></p>
+                <p class="mb-0 mt-2"><a href="{{ url_for('auth.create_test_user') }}" class="text-info">創建測試帳號</a></p>
+            </div>
+        </div>
+        
+        <div class="mt-4 text-center">
+            <p class="mb-2">登錄即表示您同意我們的<a href="#">服務條款</a>和<a href="#">隱私政策</a>。</p>
+            <p>如果您忘記密碼，請<a href="{{ url_for('auth.forgot_password') }}">點擊這裡</a>重置。</p>
+        </div>
+    </div>
+</div>
+{% endblock %} 

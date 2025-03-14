@@ -1,0 +1,197 @@
+{% extends "layout.html" %}
+
+{% block title %}測驗 - 日語學習平台{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="mb-4">日語測驗</h1>
+    
+    <!-- 過濾選項 -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title">過濾測驗</h5>
+            <form action="{{ url_for('japanese.quizzes') }}" method="get" class="row g-3">
+                <div class="col-md-4">
+                    <label for="level" class="form-label">難度級別</label>
+                    <select class="form-select" id="level" name="level">
+                        <option value="">所有級別</option>
+                        <option value="N5">N5 (初級)</option>
+                        <option value="N4">N4 (基礎)</option>
+                        <option value="N3">N3 (中級)</option>
+                        <option value="N2">N2 (中高級)</option>
+                        <option value="N1">N1 (高級)</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label for="quiz_type" class="form-label">測驗類型</label>
+                    <select class="form-select" id="quiz_type" name="quiz_type">
+                        <option value="">所有類型</option>
+                        <option value="vocabulary">詞彙</option>
+                        <option value="grammar">語法</option>
+                        <option value="reading">閱讀</option>
+                        <option value="listening">聽力</option>
+                        <option value="mixed">綜合</option>
+                    </select>
+                </div>
+                <div class="col-md-4 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">應用過濾器</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- 測驗列表 -->
+    <div class="row row-cols-1 row-cols-md-2 g-4">
+        {% if quizzes %}
+            {% for quiz in quizzes %}
+                <div class="col">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ quiz.title }}</h5>
+                            <p class="card-text">{{ quiz.description }}</p>
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="badge bg-primary">{{ quiz.level }}</span>
+                                <span class="badge bg-secondary">{{ quiz.type_display }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-muted">{{ quiz.question_count }} 題 | {{ quiz.time_limit }} 分鐘</small>
+                                <a href="{{ url_for('japanese.quiz_detail', quiz_id=quiz.id) }}" class="btn btn-sm btn-outline-primary">開始測驗</a>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-light">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-muted">已完成: {{ quiz.completion_count }} 次</small>
+                                <small class="text-muted">平均分數: {{ quiz.average_score|default('尚無', true) }}</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-12 text-center py-5">
+                <div class="alert alert-info">
+                    <h4 class="alert-heading">暫無測驗</h4>
+                    <p>
+                        {% if request.args.get('level') or request.args.get('quiz_type') %}
+                            符合當前過濾條件的測驗暫時還沒有。請嘗試使用不同的過濾選項。
+                        {% else %}
+                            暫時還沒有可用的測驗。請過段時間再來查看。
+                        {% endif %}
+                    </p>
+                </div>
+                <!-- 模擬測驗 -->
+                <div class="mt-4">
+                    <h5>您可能感興趣的測驗</h5>
+                    <div class="row row-cols-1 row-cols-md-2 g-4 mt-2">
+                        <div class="col">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title">N5基礎詞彙測驗</h5>
+                                    <p class="card-text">測試您對JLPT N5級別常用詞彙的掌握程度。</p>
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="badge bg-primary">N5</span>
+                                        <span class="badge bg-secondary">詞彙</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <small class="text-muted">20 題 | 10 分鐘</small>
+                                        <a href="#" class="btn btn-sm btn-outline-primary">開始測驗</a>
+                                    </div>
+                                </div>
+                                <div class="card-footer bg-light">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <small class="text-muted">已完成: 342 次</small>
+                                        <small class="text-muted">平均分數: 75%</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title">N4語法挑戰</h5>
+                                    <p class="card-text">挑戰JLPT N4常見語法點的測驗，提高您的日語語法準確性。</p>
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="badge bg-primary">N4</span>
+                                        <span class="badge bg-secondary">語法</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <small class="text-muted">15 題 | 15 分鐘</small>
+                                        <a href="#" class="btn btn-sm btn-outline-primary">開始測驗</a>
+                                    </div>
+                                </div>
+                                <div class="card-footer bg-light">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <small class="text-muted">已完成: 187 次</small>
+                                        <small class="text-muted">平均分數: 68%</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+    
+    <!-- 測驗結果歷史 -->
+    {% if user_quiz_history %}
+        <div class="mt-5">
+            <h3>您的測驗歷史</h3>
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>測驗名稱</th>
+                            <th>級別</th>
+                            <th>完成日期</th>
+                            <th>得分</th>
+                            <th>耗時</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for history in user_quiz_history %}
+                            <tr>
+                                <td>{{ history.quiz.title }}</td>
+                                <td><span class="badge bg-primary">{{ history.quiz.level }}</span></td>
+                                <td>{{ history.completed_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                                <td>
+                                    <div class="progress" style="height: 20px;">
+                                        <div class="progress-bar {{ 'bg-success' if history.score_percentage >= 80 else 'bg-warning' if history.score_percentage >= 60 else 'bg-danger' }}" 
+                                             role="progressbar" 
+                                             style="width: {{ history.score_percentage }}%;" 
+                                             aria-valuenow="{{ history.score_percentage }}" 
+                                             aria-valuemin="0" 
+                                             aria-valuemax="100">
+                                            {{ history.score }}/{{ history.quiz.question_count }} ({{ history.score_percentage }}%)
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>{{ history.time_taken }} 分鐘</td>
+                                <td>
+                                    <a href="{{ url_for('japanese.quiz_result', history_id=history.id) }}" class="btn btn-sm btn-outline-secondary">查看詳情</a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    {% endif %}
+    
+    <!-- 訂閱提示 -->
+    {% if user_subscription == 'free' %}
+        <div class="alert alert-info mt-5">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h4>升級到高級會員，解鎖專業測驗</h4>
+                    <p class="mb-0">訂閱高級會員計劃，即可獲取完整的JLPT模擬考試、詳細的答案解析以及個性化的學習建議。</p>
+                </div>
+                <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                    <a href="{{ url_for('auth.subscription') }}" class="btn btn-primary">查看高級方案</a>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %} 

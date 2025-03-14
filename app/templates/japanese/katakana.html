@@ -1,0 +1,278 @@
+{% extends "layout.html" %}
+
+{% block title %}片假名學習 - 日語學習平台{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">片假名學習</h1>
+    
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5 class="card-title mb-0">片假名練習</h5>
+                </div>
+                <div class="card-body">
+                    <div class="practice-area text-center">
+                        <h2 id="current-kana" class="display-4 mb-4">-</h2>
+                        <p class="text-muted mb-3">選擇正確的讀音：</p>
+                        <div id="options-container" class="d-flex flex-wrap justify-content-center gap-2 mb-3">
+                            <!-- 選項按鈕將在這裡動態生成 -->
+                        </div>
+                        <h5 id="feedback" class="mb-4"></h5>
+                        <button id="next-button" class="btn btn-primary btn-lg mb-3" disabled>下一題</button>
+                    </div>
+                    
+                    <div class="text-center mt-3">
+                        <div class="btn-group">
+                            <button id="start-practice" class="btn btn-outline-success">開始練習</button>
+                            <button id="reset-practice" class="btn btn-outline-danger">重新開始</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span>正確: <span id="correct-count">0</span></span>
+                        <span>錯誤: <span id="incorrect-count">0</span></span>
+                        <span>總計: <span id="total-count">0</span></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header bg-info text-white">
+                    <h5 class="card-title mb-0">外來語例詞</h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group">
+                        {% for kana in katakana_list %}
+                            {% if kana.example_word %}
+                                <div class="list-group-item">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <strong>{{ kana.example_word }}</strong>
+                                            <small class="text-muted">({{ kana.romaji }})</small>
+                                        </div>
+                                        <div>{{ kana.example_translation }}</div>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="card-title mb-0">片假名知識</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5>片假名的用途：</h5>
+                            <ul>
+                                <li>表示外來語（如「コーヒー」coffee）</li>
+                                <li>表示外國地名和人名</li>
+                                <li>表示擬聲詞和擬態詞</li>
+                                <li>強調某些詞語</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>學習片假名的小技巧：</h5>
+                            <ul>
+                                <li>注意片假名與平假名的視覺區別</li>
+                                <li>通過外來語學習片假名</li>
+                                <li>片假名通常更加直線化和棱角分明</li>
+                                <li>練習寫常見的外來語品牌名稱</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // 獲取片假名數據
+    const katakanaList = JSON.parse('{{ katakana_list|tojson|safe }}');
+    
+    // 只保留有字符屬性的片假名進行練習
+    const validKatakana = katakanaList.filter(kana => kana.character);
+    
+    // 練習區域元素
+    const currentKanaElement = document.getElementById('current-kana');
+    const optionsContainer = document.getElementById('options-container');
+    const feedbackElement = document.getElementById('feedback');
+    const nextButton = document.getElementById('next-button');
+    const startButton = document.getElementById('start-practice');
+    const resetButton = document.getElementById('reset-practice');
+    const correctCountElement = document.getElementById('correct-count');
+    const incorrectCountElement = document.getElementById('incorrect-count');
+    const totalCountElement = document.getElementById('total-count');
+    
+    // 追蹤得分
+    let correctCount = 0;
+    let incorrectCount = 0;
+    let totalCount = 0;
+    
+    // 當前問題
+    let currentKana = null;
+    let options = [];
+    
+    // 初始化練習
+    function initPractice() {
+        correctCount = 0;
+        incorrectCount = 0;
+        totalCount = 0;
+        updateScoreDisplay();
+        
+        startButton.addEventListener('click', startPractice);
+        resetButton.addEventListener('click', resetPractice);
+        nextButton.addEventListener('click', nextQuestion);
+    }
+    
+    // 開始練習
+    function startPractice() {
+        resetPractice();
+        nextQuestion();
+    }
+    
+    // 重置練習
+    function resetPractice() {
+        correctCount = 0;
+        incorrectCount = 0;
+        totalCount = 0;
+        updateScoreDisplay();
+        currentKanaElement.textContent = '-';
+        optionsContainer.innerHTML = '';
+        feedbackElement.textContent = '';
+        nextButton.disabled = true;
+    }
+    
+    // 更新分數顯示
+    function updateScoreDisplay() {
+        correctCountElement.textContent = correctCount;
+        incorrectCountElement.textContent = incorrectCount;
+        totalCountElement.textContent = totalCount;
+    }
+    
+    // 產生下一個問題
+    function nextQuestion() {
+        // 清除上一題的反饋
+        feedbackElement.textContent = '';
+        feedbackElement.className = 'h5 mb-0';
+        
+        // 禁用下一題按鈕直到選擇答案
+        nextButton.disabled = true;
+        
+        // 確保我們只選擇有效的片假名
+        if (validKatakana.length === 0) {
+            feedbackElement.textContent = '沒有可用的片假名數據';
+            return;
+        }
+        
+        // 隨機選擇一個片假名
+        currentKana = validKatakana[Math.floor(Math.random() * validKatakana.length)];
+        
+        // 確認這是一個有效的片假名對象並且有字符屬性
+        if (currentKana && currentKana.character) {
+            currentKanaElement.textContent = currentKana.character;
+        } else {
+            console.error("選中的片假名無效或字符缺失:", currentKana);
+            currentKanaElement.textContent = "錯誤";
+            return;
+        }
+        
+        // 創建選項
+        createOptions();
+    }
+    
+    // 創建選項按鈕
+    function createOptions() {
+        optionsContainer.innerHTML = '';
+        
+        // 獲取所有有效片假名的羅馬音
+        const allRomaji = validKatakana.map(item => item.romaji).filter(romaji => romaji);
+        
+        // 創建選項，包括正確答案和3個隨機干擾項
+        options = [currentKana.romaji];
+        
+        // 過濾掉已經在選項中的羅馬音
+        let availableOptions = allRomaji.filter(r => r !== currentKana.romaji);
+        
+        // 隨機選擇3個干擾項
+        while (options.length < 4 && availableOptions.length > 0) {
+            const randomIndex = Math.floor(Math.random() * availableOptions.length);
+            options.push(availableOptions[randomIndex]);
+            availableOptions.splice(randomIndex, 1);
+        }
+        
+        // 打亂選項順序
+        for (let i = options.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [options[i], options[j]] = [options[j], options[i]];
+        }
+        
+        // 創建選項按鈕
+        options.forEach(option => {
+            const button = document.createElement('button');
+            button.className = 'btn btn-outline-primary btn-lg';
+            button.textContent = option;
+            button.dataset.romaji = option;
+            button.addEventListener('click', checkAnswer);
+            optionsContainer.appendChild(button);
+        });
+    }
+    
+    // 檢查答案
+    function checkAnswer(event) {
+        const selectedRomaji = event.target.dataset.romaji;
+        const correct = selectedRomaji === currentKana.romaji;
+        
+        // 禁用所有選項按鈕
+        const optionButtons = optionsContainer.querySelectorAll('button');
+        optionButtons.forEach(button => {
+            button.disabled = true;
+            
+            // 正確的答案顯示為綠色
+            if (button.dataset.romaji === currentKana.romaji) {
+                button.className = 'btn btn-success btn-lg';
+            }
+            
+            // 如果選擇了錯誤答案，標記為紅色
+            if (!correct && button.dataset.romaji === selectedRomaji) {
+                button.className = 'btn btn-danger btn-lg';
+            }
+        });
+        
+        // 更新得分和反饋
+        if (correct) {
+            correctCount++;
+            feedbackElement.textContent = '正確！';
+            feedbackElement.className = 'h5 mb-0 text-success';
+        } else {
+            incorrectCount++;
+            feedbackElement.textContent = `錯誤！正確答案是: ${currentKana.romaji}`;
+            feedbackElement.className = 'h5 mb-0 text-danger';
+        }
+        
+        totalCount++;
+        updateScoreDisplay();
+        
+        // 總是啟用下一題按鈕，無論答案是否正確
+        nextButton.disabled = false;
+    }
+    
+    // 初始化練習
+    initPractice();
+});
+</script>
+{% endblock %} 

@@ -1,0 +1,324 @@
+[
+  {
+    "character": "ア",
+    "romaji": "a",
+    "example_word": "アメリカ",
+    "example_translation": "美國",
+    "audio_url": ""
+  },
+  {
+    "character": "イ",
+    "romaji": "i",
+    "example_word": "イギリス",
+    "example_translation": "英國",
+    "audio_url": ""
+  },
+  {
+    "character": "ウ",
+    "romaji": "u",
+    "example_word": "ウール",
+    "example_translation": "羊毛",
+    "audio_url": ""
+  },
+  {
+    "character": "エ",
+    "romaji": "e",
+    "example_word": "エレベーター",
+    "example_translation": "電梯",
+    "audio_url": ""
+  },
+  {
+    "character": "オ",
+    "romaji": "o",
+    "example_word": "オーストラリア",
+    "example_translation": "澳大利亞",
+    "audio_url": ""
+  },
+  {
+    "character": "カ",
+    "romaji": "ka",
+    "example_word": "カメラ",
+    "example_translation": "相機",
+    "audio_url": ""
+  },
+  {
+    "character": "キ",
+    "romaji": "ki",
+    "example_word": "キーボード",
+    "example_translation": "鍵盤",
+    "audio_url": ""
+  },
+  {
+    "character": "ク",
+    "romaji": "ku",
+    "example_word": "クラス",
+    "example_translation": "班級",
+    "audio_url": ""
+  },
+  {
+    "character": "ケ",
+    "romaji": "ke",
+    "example_word": "ケーキ",
+    "example_translation": "蛋糕",
+    "audio_url": ""
+  },
+  {
+    "character": "コ",
+    "romaji": "ko",
+    "example_word": "コーヒー",
+    "example_translation": "咖啡",
+    "audio_url": ""
+  },
+  {
+    "character": "サ",
+    "romaji": "sa",
+    "example_word": "サイト",
+    "example_translation": "網站",
+    "audio_url": ""
+  },
+  {
+    "character": "シ",
+    "romaji": "shi",
+    "example_word": "シャツ",
+    "example_translation": "襯衫",
+    "audio_url": ""
+  },
+  {
+    "character": "ス",
+    "romaji": "su",
+    "example_word": "スポーツ",
+    "example_translation": "運動",
+    "audio_url": ""
+  },
+  {
+    "character": "セ",
+    "romaji": "se",
+    "example_word": "セーター",
+    "example_translation": "毛衣",
+    "audio_url": ""
+  },
+  {
+    "character": "ソ",
+    "romaji": "so",
+    "example_word": "ソファ",
+    "example_translation": "沙發",
+    "audio_url": ""
+  },
+  {
+    "character": "タ",
+    "romaji": "ta",
+    "example_word": "タクシー",
+    "example_translation": "計程車",
+    "audio_url": ""
+  },
+  {
+    "character": "チ",
+    "romaji": "chi",
+    "example_word": "チョコレート",
+    "example_translation": "巧克力",
+    "audio_url": ""
+  },
+  {
+    "character": "ツ",
+    "romaji": "tsu",
+    "example_word": "ツアー",
+    "example_translation": "旅行團",
+    "audio_url": ""
+  },
+  {
+    "character": "テ",
+    "romaji": "te",
+    "example_word": "テスト",
+    "example_translation": "測試",
+    "audio_url": ""
+  },
+  {
+    "character": "ト",
+    "romaji": "to",
+    "example_word": "トマト",
+    "example_translation": "番茄",
+    "audio_url": ""
+  },
+  {
+    "character": "ナ",
+    "romaji": "na",
+    "example_word": "ナイフ",
+    "example_translation": "刀",
+    "audio_url": ""
+  },
+  {
+    "character": "ニ",
+    "romaji": "ni",
+    "example_word": "ニュース",
+    "example_translation": "新聞",
+    "audio_url": ""
+  },
+  {
+    "character": "ヌ",
+    "romaji": "nu",
+    "example_word": "ヌガー",
+    "example_translation": "牛軋糖",
+    "audio_url": ""
+  },
+  {
+    "character": "ネ",
+    "romaji": "ne",
+    "example_word": "ネクタイ",
+    "example_translation": "領帶",
+    "audio_url": ""
+  },
+  {
+    "character": "ノ",
+    "romaji": "no",
+    "example_word": "ノート",
+    "example_translation": "筆記本",
+    "audio_url": ""
+  },
+  {
+    "character": "ハ",
+    "romaji": "ha",
+    "example_word": "ハンバーガー",
+    "example_translation": "漢堡",
+    "audio_url": ""
+  },
+  {
+    "character": "ヒ",
+    "romaji": "hi",
+    "example_word": "ヒーター",
+    "example_translation": "暖氣",
+    "audio_url": ""
+  },
+  {
+    "character": "フ",
+    "romaji": "fu",
+    "example_word": "フランス",
+    "example_translation": "法國",
+    "audio_url": ""
+  },
+  {
+    "character": "ヘ",
+    "romaji": "he",
+    "example_word": "ヘルメット",
+    "example_translation": "頭盔",
+    "audio_url": ""
+  },
+  {
+    "character": "ホ",
+    "romaji": "ho",
+    "example_word": "ホテル",
+    "example_translation": "旅館",
+    "audio_url": ""
+  },
+  {
+    "character": "マ",
+    "romaji": "ma",
+    "example_word": "マンゴー",
+    "example_translation": "芒果",
+    "audio_url": ""
+  },
+  {
+    "character": "ミ",
+    "romaji": "mi",
+    "example_word": "ミルク",
+    "example_translation": "牛奶",
+    "audio_url": ""
+  },
+  {
+    "character": "ム",
+    "romaji": "mu",
+    "example_word": "ムース",
+    "example_translation": "慕斯",
+    "audio_url": ""
+  },
+  {
+    "character": "メ",
+    "romaji": "me",
+    "example_word": "メニュー",
+    "example_translation": "菜單",
+    "audio_url": ""
+  },
+  {
+    "character": "モ",
+    "romaji": "mo",
+    "example_word": "モデル",
+    "example_translation": "模特",
+    "audio_url": ""
+  },
+  {
+    "character": "ヤ",
+    "romaji": "ya",
+    "example_word": "ヤクルト",
+    "example_translation": "優酪乳",
+    "audio_url": ""
+  },
+  {
+    "character": "ユ",
+    "romaji": "yu",
+    "example_word": "ユニフォーム",
+    "example_translation": "制服",
+    "audio_url": ""
+  },
+  {
+    "character": "ヨ",
+    "romaji": "yo",
+    "example_word": "ヨガ",
+    "example_translation": "瑜伽",
+    "audio_url": ""
+  },
+  {
+    "character": "ラ",
+    "romaji": "ra",
+    "example_word": "ラジオ",
+    "example_translation": "收音機",
+    "audio_url": ""
+  },
+  {
+    "character": "リ",
+    "romaji": "ri",
+    "example_word": "リンゴ",
+    "example_translation": "蘋果",
+    "audio_url": ""
+  },
+  {
+    "character": "ル",
+    "romaji": "ru",
+    "example_word": "ルール",
+    "example_translation": "規則",
+    "audio_url": ""
+  },
+  {
+    "character": "レ",
+    "romaji": "re",
+    "example_word": "レストラン",
+    "example_translation": "餐廳",
+    "audio_url": ""
+  },
+  {
+    "character": "ロ",
+    "romaji": "ro",
+    "example_word": "ロボット",
+    "example_translation": "機器人",
+    "audio_url": ""
+  },
+  {
+    "character": "ワ",
+    "romaji": "wa",
+    "example_word": "ワイン",
+    "example_translation": "葡萄酒",
+    "audio_url": ""
+  },
+  {
+    "character": "ヲ",
+    "romaji": "wo",
+    "example_word": "ヲタク",
+    "example_translation": "御宅族",
+    "audio_url": ""
+  },
+  {
+    "character": "ン",
+    "romaji": "n",
+    "example_word": "アンケート",
+    "example_translation": "問卷調查",
+    "audio_url": ""
+  }
+]

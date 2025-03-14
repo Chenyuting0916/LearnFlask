@@ -1,0 +1,182 @@
+[
+  {
+    "character": "あ",
+    "romaji": "a",
+    "example_word": "あめ",
+    "example_translation": "雨"
+  },
+  {
+    "character": "い",
+    "romaji": "i",
+    "example_word": "いぬ",
+    "example_translation": "狗"
+  },
+  {
+    "character": "う",
+    "romaji": "u",
+    "example_word": "うみ",
+    "example_translation": "海"
+  },
+  {
+    "character": "え",
+    "romaji": "e",
+    "example_word": "えき",
+    "example_translation": "車站"
+  },
+  {
+    "character": "お",
+    "romaji": "o",
+    "example_word": "おと",
+    "example_translation": "聲音"
+  },
+  {
+    "character": "か",
+    "romaji": "ka",
+    "example_word": "かみ",
+    "example_translation": "紙"
+  },
+  {
+    "character": "き",
+    "romaji": "ki",
+    "example_word": "きた",
+    "example_translation": "北"
+  },
+  {
+    "character": "く",
+    "romaji": "ku",
+    "example_word": "くに",
+    "example_translation": "國家"
+  },
+  {
+    "character": "け",
+    "romaji": "ke",
+    "example_word": "けん",
+    "example_translation": "縣"
+  },
+  {
+    "character": "こ",
+    "romaji": "ko",
+    "example_word": "こと",
+    "example_translation": "事"
+  },
+  {
+    "character": "さ",
+    "romaji": "sa",
+    "example_word": "さく",
+    "example_translation": "咲"
+  },
+  {
+    "character": "し",
+    "romaji": "shi",
+    "example_word": "しま",
+    "example_translation": "島"
+  },
+  {
+    "character": "す",
+    "romaji": "su",
+    "example_word": "すし",
+    "example_translation": "壽司"
+  },
+  {
+    "character": "せ",
+    "romaji": "se",
+    "example_word": "せん",
+    "example_translation": "線"
+  },
+  {
+    "character": "そ",
+    "romaji": "so",
+    "example_word": "そら",
+    "example_translation": "天空"
+  },
+  {
+    "character": "た",
+    "romaji": "ta",
+    "example_word": "たべる",
+    "example_translation": "吃"
+  },
+  {
+    "character": "ち",
+    "romaji": "chi",
+    "example_word": "ちず",
+    "example_translation": "地圖"
+  },
+  {
+    "character": "つ",
+    "romaji": "tsu",
+    "example_word": "つき",
+    "example_translation": "月亮"
+  },
+  {
+    "character": "て",
+    "romaji": "te",
+    "example_word": "てがみ",
+    "example_translation": "信"
+  },
+  {
+    "character": "と",
+    "romaji": "to",
+    "example_word": "とり",
+    "example_translation": "鳥"
+  },
+  {
+    "character": "な",
+    "romaji": "na",
+    "example_word": "なつ",
+    "example_translation": "夏天"
+  },
+  {
+    "character": "に",
+    "romaji": "ni",
+    "example_word": "にわ",
+    "example_translation": "花園"
+  },
+  {
+    "character": "ぬ",
+    "romaji": "nu",
+    "example_word": "ぬの",
+    "example_translation": "布"
+  },
+  {
+    "character": "ね",
+    "romaji": "ne",
+    "example_word": "ねこ",
+    "example_translation": "貓"
+  },
+  {
+    "character": "の",
+    "romaji": "no",
+    "example_word": "のみもの",
+    "example_translation": "飲料"
+  },
+  {
+    "character": "は",
+    "romaji": "ha",
+    "example_word": "はな",
+    "example_translation": "花"
+  },
+  {
+    "character": "ひ",
+    "romaji": "hi",
+    "example_word": "ひる",
+    "example_translation": "中午"
+  },
+  {
+    "character": "ふ",
+    "romaji": "fu",
+    "example_word": "ふゆ",
+    "example_translation": "冬天"
+  },
+  {
+    "character": "へ",
+    "romaji": "he",
+    "example_word": "へや",
+    "example_translation": "房間"
+  },
+  {
+    "character": "ほ",
+    "romaji": "ho",
+    "example_word": "ほん",
+    "example_translation": "書"
+  }
+]

@@ -1,0 +1,35 @@
+[
+  {
+    "id": "1",
+    "title": "平假名測驗",
+    "description": "測試你的平假名知識",
+    "level": "初級",
+    "is_premium": false,
+    "questions": [
+      {
+        "id": "q1",
+        "text": "「あ」的正確發音是什麼？",
+        "options": [
+          "a",
+          "i",
+          "u",
+          "e"
+        ],
+        "correct_answer": "a",
+        "explanation": "「あ」的發音是「a」，如「apple」中的「a」。"
+      },
+      {
+        "id": "q2",
+        "text": "「い」的正確發音是什麼？",
+        "options": [
+          "a",
+          "i",
+          "u",
+          "e"
+        ],
+        "correct_answer": "i",
+        "explanation": "「い」的發音是「i」，如「meet」中的「ee」。"
+      }
+    ]
+  }
+]

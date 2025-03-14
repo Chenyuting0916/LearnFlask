@@ -1,0 +1,135 @@
+{% extends "layout.html" %}
+
+{% block title %}課程 - 日語學習平台{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="mb-4">日語課程</h1>
+    
+    <!-- 過濾選項 -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title">過濾課程</h5>
+            <form action="{{ url_for('japanese.lessons') }}" method="get" class="row g-3">
+                <div class="col-md-4">
+                    <label for="level" class="form-label">難度級別</label>
+                    <select class="form-select" id="level" name="level">
+                        <option value="">所有級別</option>
+                        <option value="N5">N5 (初級)</option>
+                        <option value="N4">N4 (基礎)</option>
+                        <option value="N3">N3 (中級)</option>
+                        <option value="N2">N2 (中高級)</option>
+                        <option value="N1">N1 (高級)</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label for="is_premium" class="form-label">課程類型</label>
+                    <select class="form-select" id="is_premium" name="is_premium">
+                        <option value="">所有課程</option>
+                        <option value="false">免費課程</option>
+                        <option value="true">高級課程</option>
+                    </select>
+                </div>
+                <div class="col-md-4 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">應用過濾器</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- 課程列表 -->
+    <div class="row row-cols-1 row-cols-md-2 g-4">
+        {% if lessons %}
+            {% for lesson in lessons %}
+                <div class="col">
+                    <div class="card h-100 {% if lesson.is_premium %}border-warning{% endif %}">
+                        {% if lesson.is_premium %}
+                            <div class="card-header bg-warning text-dark">
+                                <span class="badge bg-dark">高級課程</span>
+                            </div>
+                        {% endif %}
+                        <div class="card-body">
+                            <h5 class="card-title">{{ lesson.title }}</h5>
+                            <p class="card-text">{{ lesson.description }}</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="badge bg-primary">{{ lesson.level }}</span>
+                                <a href="{{ url_for('japanese.lesson_detail', lesson_id=lesson.id) }}" class="btn btn-sm btn-outline-primary">查看課程</a>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-light">
+                            <small class="text-muted">包含 {{ lesson.vocabulary_ids|length }} 個詞彙和 {{ lesson.grammar_points|length }} 個語法點</small>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-12 text-center py-5">
+                <div class="alert alert-info">
+                    <h4 class="alert-heading">暫無課程</h4>
+                    <p>
+                        {% if request.args.get('level') or request.args.get('is_premium') %}
+                            符合當前過濾條件的課程暫時還沒有。請嘗試使用不同的過濾選項。
+                        {% else %}
+                            暫時還沒有可用的課程。請過段時間再來查看。
+                        {% endif %}
+                    </p>
+                </div>
+                <!-- 模擬課程 -->
+                <div class="mt-4">
+                    <h5>您可能感興趣的課程</h5>
+                    <div class="row row-cols-1 row-cols-md-2 g-4 mt-2">
+                        <div class="col">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title">日語入門 - 基礎會話</h5>
+                                    <p class="card-text">學習日常生活中最常用的日語會話表達，適合完全沒有基礎的學習者。</p>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="badge bg-primary">N5</span>
+                                        <a href="#" class="btn btn-sm btn-outline-primary">查看課程</a>
+                                    </div>
+                                </div>
+                                <div class="card-footer bg-light">
+                                    <small class="text-muted">包含 50 個詞彙和 10 個語法點</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="card h-100 border-warning">
+                                <div class="card-header bg-warning text-dark">
+                                    <span class="badge bg-dark">高級課程</span>
+                                </div>
+                                <div class="card-body">
+                                    <h5 class="card-title">JLPT N4 完全準備</h5>
+                                    <p class="card-text">針對JLPT N4考試的完整備考課程，包含全部考點和模擬試題。</p>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="badge bg-primary">N4</span>
+                                        <a href="#" class="btn btn-sm btn-outline-primary">查看課程</a>
+                                    </div>
+                                </div>
+                                <div class="card-footer bg-light">
+                                    <small class="text-muted">包含 200 個詞彙和 30 個語法點</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+    
+    <!-- 訂閱提示 -->
+    {% if user_subscription == 'free' %}
+        <div class="alert alert-info mt-5">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h4>升級到高級會員，解鎖所有課程</h4>
+                    <p class="mb-0">訂閱高級會員計劃，即可獲取完整的JLPT考試備考課程、專業發音訓練以及更多高級學習資源。</p>
+                </div>
+                <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                    <a href="{{ url_for('auth.subscription') }}" class="btn btn-primary">查看高級方案</a>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %} 
