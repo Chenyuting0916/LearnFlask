@@ -20,40 +20,65 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
       
-      - name: Create file list for deployment
+      - name: Prepare deployment
         run: |
-          # 創建一個包含所有需要上傳文件的列表
-          echo "建立部署文件列表..."
+          echo "==== 準備部署 ===="
           
-          # 先列出所有文件
-          find . -type f | sort > all_files.txt
+          # 設置調試模式
+          set -ex
           
-          # 排除不需要上傳的文件和目錄
-          grep -v "^\./\.git/" all_files.txt | \
-          grep -v "^\./cache/" | \
-          grep -v "^\./app/data/" | \
-          grep -v "^\./venv/" | \
-          grep -v "^\./\." | \
-          grep -v "all_files.txt" > deploy_files.txt
+          # 顯示工作空間根目錄
+          echo "工作空間根目錄:"
+          pwd
           
-          # 顯示將部署的文件數量
+          # 創建一個簡單的部署文件列表（除了cache和data目錄）
+          echo "創建部署文件列表..."
+          find . -type f \
+            -not -path "*/\.*" \
+            -not -path "*/venv/*" \
+            -not -path "*/cache/*" \
+            -not -path "*/app/data/*" \
+            > deploy_files.txt
+          
+          # 顯示將要部署的文件數量和類型
           echo "將部署 $(wc -l < deploy_files.txt) 個文件"
+          echo "HTML文件數量: $(grep -c "\.html$" deploy_files.txt)"
+          echo "Python文件數量: $(grep -c "\.py$" deploy_files.txt)"
           
+          # 檢查關鍵文件是否在列表中
+          echo "檢查關鍵文件..."
+          for file in "app/templates/common/layout.html" "app/templates/japanese/index.html" "app/routes/japanese_routes.py"; do
+            if grep -q "$file" deploy_files.txt; then
+              echo "✅ $file 在部署列表中"
+            else
+              echo "❌ $file 不在部署列表中!"
+            fi
+          done
+      
       - name: Deploy to PythonAnywhere
         run: |
+          echo "==== 開始部署 ===="
+          
+          # 設置調試模式
+          set -ex
+          
           # 設定基本變量
           BASE_DIR="/home/${{ secrets.PA_USERNAME }}/learnflask"
           API_TOKEN="${{ secrets.PA_API_TOKEN }}"
           API_BASE="https://www.pythonanywhere.com/api/v0/user/${{ secrets.PA_USERNAME }}"
           
-          # 確保基本目錄存在
-          echo "創建項目根目錄..."
+          # 步驟1: 收集目錄列表並確保所有目錄存在
+          echo "創建所有必要的目錄..."
+          DIRS=$(cat deploy_files.txt | xargs -I{} dirname {} | sort | uniq)
+          echo "$DIRS" > directories.txt
+          
+          # 創建項目根目錄
+          echo "創建項目根目錄: $BASE_DIR"
           curl -X POST "$API_BASE/files/path$BASE_DIR/" \
             -H "Authorization: Token $API_TOKEN" || true
           
-          # 第一步：找出所有需要創建的目錄
-          echo "創建所有必要的目錄..."
-          cat deploy_files.txt | xargs -I{} dirname {} | sort | uniq | while read dir; do
+          # 創建所有目錄，包括嵌套目錄
+          cat directories.txt | while read dir; do
             # 跳過當前目錄
             if [ "$dir" = "." ]; then
               continue
@@ -68,7 +93,7 @@ jobs:
               -H "Authorization: Token $API_TOKEN" || true
           done
           
-          # 第二步：創建 data 和 cache 目錄，但不上傳其內容
+          # 步驟2: 創建空的 data 和 cache 目錄
           echo "創建 data 和 cache 目錄..."
           for dir in app/data cache; do
             remote_dir="$BASE_DIR/$dir"
@@ -77,28 +102,98 @@ jobs:
               -H "Authorization: Token $API_TOKEN" || true
           done
           
-          # 第三步：上傳所有需要部署的文件
+          # 步驟3: 上傳所有文件
           echo "上傳所有文件..."
-          cat deploy_files.txt | while read file; do
-            # 把相對路徑轉為 PythonAnywhere 上的絕對路徑
-            remote_file="$BASE_DIR/${file#./}"
-            echo "上傳文件: $file -> $remote_file"
+          TOTAL_FILES=$(wc -l < deploy_files.txt)
+          COUNTER=0
+          SUCCESS=0
+          FAILED=0
+          ERRORS_LOG=""
+          
+          # 創建兩個函數用於上傳文件和重試
+          upload_file() {
+            local file=$1
+            local remote_file="$BASE_DIR/${file#./}"
             
             # 上傳文件
-            curl -X POST "$API_BASE/files/path$remote_file" \
+            local status_code=$(curl -s -o /dev/null -w "%{http_code}" \
+              -X POST "$API_BASE/files/path$remote_file" \
+              -H "Authorization: Token $API_TOKEN" \
+              -F "content=@$file" \
+              -F "path=$remote_file")
+              
+            echo "$status_code"
+          }
+          
+          retry_upload() {
+            local file=$1
+            local remote_file="$BASE_DIR/${file#./}"
+            local retry_count=$2
+            
+            echo "🔄 嘗試重新上傳 $file (嘗試 $retry_count)..."
+            # 使用詳細輸出進行調試
+            curl -v -X POST "$API_BASE/files/path$remote_file" \
               -H "Authorization: Token $API_TOKEN" \
               -F "content=@$file" \
               -F "path=$remote_file"
+          }
+          
+          # 開始上傳所有文件
+          cat deploy_files.txt | while read file; do
+            # 更新計數器
+            COUNTER=$((COUNTER+1))
+            
+            # 顯示進度
+            echo "[$COUNTER/$TOTAL_FILES] 上傳文件: $file"
+            
+            # 上傳文件
+            STATUS_CODE=$(upload_file "$file")
+              
+            # 檢查上傳結果
+            if [ "$STATUS_CODE" = "200" ] || [ "$STATUS_CODE" = "201" ]; then
+              echo "✅ 文件上傳成功: $file (HTTP $STATUS_CODE)"
+              SUCCESS=$((SUCCESS+1))
+            else
+              echo "❌ 文件上傳失敗: $file (HTTP $STATUS_CODE)"
+              FAILED=$((FAILED+1))
+              ERRORS_LOG="$ERRORS_LOG\n$file (HTTP $STATUS_CODE)"
+              
+              # 對失敗的文件進行重試
+              retry_upload "$file" 1
+              RETRY_STATUS=$(upload_file "$file")
+              
+              if [ "$RETRY_STATUS" = "200" ] || [ "$RETRY_STATUS" = "201" ]; then
+                echo "✅ 重試成功: $file (HTTP $RETRY_STATUS)"
+                SUCCESS=$((SUCCESS+1))
+                FAILED=$((FAILED-1))
+                # 從錯誤日誌中移除
+                ERRORS_LOG=$(echo "$ERRORS_LOG" | grep -v "$file")
+              else
+                echo "❌ 重試失敗: $file (HTTP $RETRY_STATUS)"
+                # 最後一次嘗試，使用最詳細的調試
+                retry_upload "$file" 2
+              fi
+            fi
           done
           
-          # 第四步：驗證關鍵目錄的內容
+          # 步驟4: 驗證部署結果
           echo "驗證部署..."
-          for dir in app/templates app/templates/japanese app/routes config; do
+          CRITICAL_DIRS="app/templates app/templates/common app/templates/japanese app/routes"
+          for dir in $CRITICAL_DIRS; do
             echo "列出 $dir 目錄內容:"
             curl -sS "$API_BASE/files/path$BASE_DIR/$dir/" \
-              -H "Authorization: Token $API_TOKEN" || true
+              -H "Authorization: Token $API_TOKEN" 
             echo ""
           done
+          
+          # 顯示部署統計
+          echo "==== 部署統計 ===="
+          echo "總共文件: $TOTAL_FILES"
+          echo "成功上傳: $SUCCESS"
+          echo "失敗上傳: $FAILED"
+          if [ "$FAILED" -gt 0 ]; then
+            echo -e "失敗的文件:$ERRORS_LOG"
+          fi
           
           # 重新加載應用
           echo "重新加載 Web 應用..."
