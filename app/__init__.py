@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, session, redirect, url_for
 from config.settings import Config
 
 def create_app(config_class=Config):
@@ -33,7 +33,6 @@ def create_app(config_class=Config):
     @app.context_processor
     def inject_user():
         """將用戶信息注入所有模板"""
-        from flask import session
         return {
             'user_id': session.get('user_id'),
             'username': session.get('username'),
@@ -43,7 +42,6 @@ def create_app(config_class=Config):
     # 首頁重定向到日語學習首頁
     @app.route('/')
     def index():
-        from flask import redirect, url_for
         return redirect(url_for('japanese.index'))
 
     return app 
