@@ -94,6 +94,9 @@ jobs:
             # 創建目錄
             curl -X POST "$API_BASE/files/path$remote_dir/" \
               -H "Authorization: Token $API_TOKEN" || true
+              
+            # 添加延遲以避免達到 API 限制
+            sleep 0.5
           done
           
           # 步驟2: 創建空的 data 和 cache 目錄
@@ -103,6 +106,7 @@ jobs:
             echo "創建目錄: $remote_dir"
             curl -X POST "$API_BASE/files/path$remote_dir/" \
               -H "Authorization: Token $API_TOKEN" || true
+            sleep 0.5
           done
           
           # 步驟3: 上傳所有文件，確保強制覆蓋
@@ -112,6 +116,7 @@ jobs:
           SUCCESS=0
           FAILED=0
           ERRORS_LOG=""
+          TEMPLATES_LOG=""
           
           # 創建函數用於處理文件上傳
           upload_file() {
@@ -122,6 +127,9 @@ jobs:
             echo "刪除現有文件: $remote_file"
             curl -s -X DELETE "$API_BASE/files/path$remote_file" \
               -H "Authorization: Token $API_TOKEN" > /dev/null
+              
+            # 暫停以避免 API 速率限制
+            sleep 0.5
               
             # 然後上傳新文件
             echo "上傳新文件: $file -> $remote_file"
@@ -138,24 +146,38 @@ jobs:
             local file=$1
             local remote_file="$BASE_DIR/${file#./}"
             local retry_count=$2
+            local sleep_time=$3
             
-            echo "🔄 嘗試重新上傳 $file (嘗試 $retry_count)..."
+            echo "🔄 嘗試重新上傳 $file (嘗試 $retry_count)，等待 ${sleep_time}秒..."
+            
+            # 等待指定的時間 (指數退避策略)
+            sleep $sleep_time
             
             # 強制刪除現有文件
-            curl -v -X DELETE "$API_BASE/files/path$remote_file" \
+            curl -s -X DELETE "$API_BASE/files/path$remote_file" \
               -H "Authorization: Token $API_TOKEN" > /dev/null 2>&1
               
+            sleep 0.5
+              
             # 使用詳細輸出進行調試
-            curl -v -X POST "$API_BASE/files/path$remote_file" \
+            local retry_status=$(curl -s -o /dev/null -w "%{http_code}" \
+              -X POST "$API_BASE/files/path$remote_file" \
               -H "Authorization: Token $API_TOKEN" \
               -F "content=@$file" \
-              -F "path=$remote_file"
+              -F "path=$remote_file")
+            
+            echo "$retry_status"
           }
           
-          # 開始上傳所有文件
+          # 開始上傳所有文件，批次處理並添加延遲
+          # 每上傳10個文件暫停5秒，避免速率限制
+          BATCH_SIZE=5
+          BATCH_COUNT=0
+          
           cat deploy_files.txt | while read file; do
             # 更新計數器
             COUNTER=$((COUNTER+1))
+            BATCH_COUNT=$((BATCH_COUNT+1))
             
             # 顯示進度
             echo "[$COUNTER/$TOTAL_FILES] 上傳文件: $file"
@@ -167,26 +189,77 @@ jobs:
             if [ "$STATUS_CODE" = "200" ] || [ "$STATUS_CODE" = "201" ]; then
               echo "✅ 文件上傳成功: $file (HTTP $STATUS_CODE)"
               SUCCESS=$((SUCCESS+1))
-            else
-              echo "❌ 文件上傳失敗: $file (HTTP $STATUS_CODE)"
-              FAILED=$((FAILED+1))
-              ERRORS_LOG="$ERRORS_LOG\n$file (HTTP $STATUS_CODE)"
               
-              # 對失敗的文件進行重試
-              retry_upload "$file" 1
-              RETRY_STATUS=$(upload_file "$file")
-              
-              if [ "$RETRY_STATUS" = "200" ] || [ "$RETRY_STATUS" = "201" ]; then
-                echo "✅ 重試成功: $file (HTTP $RETRY_STATUS)"
-                SUCCESS=$((SUCCESS+1))
-                FAILED=$((FAILED-1))
-                # 從錯誤日誌中移除
-                ERRORS_LOG=$(echo "$ERRORS_LOG" | grep -v "$file")
-              else
-                echo "❌ 重試失敗: $file (HTTP $RETRY_STATUS)"
-                # 最後一次嘗試，使用最詳細的調試
-                retry_upload "$file" 2
+              # 特別記錄模板文件
+              if [[ $file == *".html"* ]]; then
+                TEMPLATES_LOG="$TEMPLATES_LOG\n$file"
               fi
+            else
+              # 如果遇到429錯誤（速率限制），使用指數退避策略重試
+              if [ "$STATUS_CODE" = "429" ]; then
+                echo "⚠️ 遇到速率限制: $file (HTTP 429)"
+                
+                # 第一次重試等待5秒
+                echo "等待5秒後重試..."
+                RETRY_STATUS=$(retry_upload "$file" 1 5)
+                
+                if [ "$RETRY_STATUS" = "200" ] || [ "$RETRY_STATUS" = "201" ]; then
+                  echo "✅ 重試成功: $file (HTTP $RETRY_STATUS)"
+                  SUCCESS=$((SUCCESS+1))
+                elif [ "$RETRY_STATUS" = "429" ]; then
+                  # 第二次重試等待15秒
+                  echo "繼續遇到速率限制，等待15秒後重試..."
+                  RETRY_STATUS=$(retry_upload "$file" 2 15)
+                  
+                  if [ "$RETRY_STATUS" = "200" ] || [ "$RETRY_STATUS" = "201" ]; then
+                    echo "✅ 重試成功: $file (HTTP $RETRY_STATUS)"
+                    SUCCESS=$((SUCCESS+1))
+                  elif [ "$RETRY_STATUS" = "429" ]; then
+                    # 第三次重試等待30秒
+                    echo "繼續遇到速率限制，等待30秒後最後重試..."
+                    RETRY_STATUS=$(retry_upload "$file" 3 30)
+                    
+                    if [ "$RETRY_STATUS" = "200" ] || [ "$RETRY_STATUS" = "201" ]; then
+                      echo "✅ 最終重試成功: $file (HTTP $RETRY_STATUS)"
+                      SUCCESS=$((SUCCESS+1))
+                    else
+                      echo "❌ 多次重試後仍然失敗: $file (HTTP $RETRY_STATUS)"
+                      FAILED=$((FAILED+1))
+                      ERRORS_LOG="$ERRORS_LOG\n$file (HTTP $RETRY_STATUS)"
+                    fi
+                  else
+                    echo "❌ 重試失敗: $file (HTTP $RETRY_STATUS)"
+                    FAILED=$((FAILED+1))
+                    ERRORS_LOG="$ERRORS_LOG\n$file (HTTP $RETRY_STATUS)"
+                  fi
+                else
+                  echo "❌ 重試失敗: $file (HTTP $RETRY_STATUS)"
+                  FAILED=$((FAILED+1))
+                  ERRORS_LOG="$ERRORS_LOG\n$file (HTTP $RETRY_STATUS)"
+                fi
+              else
+                echo "❌ 文件上傳失敗: $file (HTTP $STATUS_CODE)"
+                RETRY_STATUS=$(retry_upload "$file" 1 3)
+                
+                if [ "$RETRY_STATUS" = "200" ] || [ "$RETRY_STATUS" = "201" ]; then
+                  echo "✅ 重試成功: $file (HTTP $RETRY_STATUS)"
+                  SUCCESS=$((SUCCESS+1))
+                else
+                  FAILED=$((FAILED+1))
+                  ERRORS_LOG="$ERRORS_LOG\n$file (HTTP $RETRY_STATUS)"
+                  echo "❌ 重試失敗: $file (HTTP $RETRY_STATUS)"
+                fi
+              fi
+            fi
+            
+            # 每上傳一批文件後暫停
+            if [ "$BATCH_COUNT" -ge "$BATCH_SIZE" ]; then
+              echo "已上傳 $BATCH_SIZE 個文件，暫停5秒避免速率限制..."
+              sleep 5
+              BATCH_COUNT=0
+            else
+              # 每個文件之間的輕微延遲
+              sleep 0.5
             fi
           done
           
@@ -220,12 +293,13 @@ jobs:
           
           # 驗證部署結果
           echo "驗證部署..."
-          CRITICAL_DIRS="app/templates app/templates/common app/templates/japanese app/routes"
+          CRITICAL_DIRS="app/templates app/templates/auth app/templates/common app/templates/japanese app/routes"
           for dir in $CRITICAL_DIRS; do
             echo "列出 $dir 目錄內容:"
             curl -sS "$API_BASE/files/path$BASE_DIR/$dir/" \
               -H "Authorization: Token $API_TOKEN" 
             echo ""
+            sleep 1  # 添加延遲避免速率限制
           done
           
           # 顯示部署統計
