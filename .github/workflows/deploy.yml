@@ -21,71 +21,49 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+          pip install requests  # 用於API調用
       
-      - name: Install LFTP
+      - name: Prepare files for deployment
         run: |
-          sudo apt-get update
-          sudo apt-get install -y lftp
+          echo "==== 準備部署文件 ===="
+          
+          # 創建壓縮文件，排除不需要的目錄
+          echo "創建部署壓縮包..."
+          zip -r deploy.zip . \
+            -x "*.git*" \
+            -x "*__pycache__*" \
+            -x "*.pyc" \
+            -x "venv/*" \
+            -x "cache/*" \
+            -x "app/data/*" \
+            -x ".env"
+          
+          # 列出壓縮包內容
+          echo "壓縮包內容:"
+          unzip -l deploy.zip | grep -E "app/templates|app/routes" | head -10
+          
+          # 檢查重要文件是否在壓縮包中
+          echo "檢查關鍵文件..."
+          for file in "app/templates/common/layout.html" "app/templates/japanese/index.html" "app/routes/japanese_routes.py"; do
+            if unzip -l deploy.zip | grep -q "$file"; then
+              echo "✅ $file 在壓縮包中"
+            else
+              echo "❌ $file 不在壓縮包中!"
+            fi
+          done
       
-      - name: Create SFTP deploy script
+      - name: Upload and deploy to PythonAnywhere
         run: |
-          echo "==== 準備SFTP部署 ===="
+          echo "==== 開始部署到PythonAnywhere ===="
           
-          # 創建LFTP腳本
-          cat > deploy.lftp << EOF
-          # 設置連接選項
-          set sftp:auto-confirm yes
-          set net:max-retries 3
-          set net:timeout 10
-          set net:reconnect-interval-base 5
-          set net:reconnect-interval-multiplier 1
-          
-          # 連接到PythonAnywhere
-          open sftp://${{ secrets.PA_USERNAME }}:${{ secrets.PA_PASSWORD }}@ssh.pythonanywhere.com
-          
-          # 創建必要目錄
-          mkdir -p /home/${{ secrets.PA_USERNAME }}/learnflask/app/data
-          mkdir -p /home/${{ secrets.PA_USERNAME }}/learnflask/cache
-          
-          # 設置排除模式
-          glob -a
-          
-          # 遞迴上傳所有文件，但排除不需要的目錄和文件
-          mirror -R --verbose \
-            --exclude-glob .git/ \
-            --exclude-glob .github/ \
-            --exclude-glob venv/ \
-            --exclude-glob __pycache__/ \
-            --exclude-glob *.pyc \
-            --exclude-glob .env \
-            --parallel=5 \
-            . /home/${{ secrets.PA_USERNAME }}/learnflask/
-          
-          # 確認關鍵文件
-          ls -la /home/${{ secrets.PA_USERNAME }}/learnflask/app/templates/common/
-          ls -la /home/${{ secrets.PA_USERNAME }}/learnflask/app/templates/japanese/
-          ls -la /home/${{ secrets.PA_USERNAME }}/learnflask/app/routes/
-          
-          # 退出
-          bye
-          EOF
-      
-      - name: Deploy using LFTP
-        run: |
-          echo "==== 開始SFTP部署 ===="
-          # 運行LFTP腳本
-          lftp -f deploy.lftp
-      
-      - name: Reload PythonAnywhere web app
-        run: |
-          echo "==== 重新加載Web應用 ===="
-          
-          # 生成簡單的Python腳本重新加載網站
-          cat > reload_app.py << 'EOF'
+          # 創建Python部署腳本
+          cat > deploy_to_pa.py << 'EOF'
           import os
           import sys
           import time
           import requests
+          import base64
+          import json
           
           # 獲取環境變量
           api_token = os.environ.get('API_TOKEN')
@@ -95,46 +73,213 @@ jobs:
               print("❌ 環境變量缺失")
               sys.exit(1)
           
-          # 重新加載網站
-          print("重新加載Web應用...")
-          try:
-              api_url = f"https://www.pythonanywhere.com/api/v0/user/{username}/webapps/{username}.pythonanywhere.com/reload/"
-              headers = {'Authorization': f'Token {api_token}'}
+          # API URL
+          api_base = f"https://www.pythonanywhere.com/api/v0/user/{username}"
+          headers = {'Authorization': f'Token {api_token}'}
+          
+          def upload_file_via_api():
+              """通過API上傳部署壓縮包"""
+              print("正在上傳部署壓縮包...")
               
-              response = requests.post(api_url, headers=headers)
-              print(f"API響應狀態碼: {response.status_code}")
-              print(f"API響應內容: {response.text}")
+              try:
+                  # 讀取zip文件
+                  with open('deploy.zip', 'rb') as f:
+                      file_content = f.read()
+                  
+                  # 設置目標路徑
+                  target_path = f"/home/{username}/deploy.zip"
+                  
+                  # 創建上傳文件的URL
+                  url = f"{api_base}/files/path{target_path}"
+                  
+                  # 上傳文件
+                  response = requests.post(
+                      url,
+                      headers=headers,
+                      files={'content': ('deploy.zip', file_content)}
+                  )
+                  
+                  if response.status_code in (200, 201):
+                      print(f"✅ 壓縮包已成功上傳到: {target_path}")
+                      return True
+                  else:
+                      print(f"❌ 上傳失敗: HTTP {response.status_code}")
+                      print(f"響應: {response.text[:200]}...")
+                      return False
+              except Exception as e:
+                  print(f"❌ 上傳過程中發生錯誤: {str(e)}")
+                  return False
+          
+          def create_console():
+              """創建一個新的bash控制台"""
+              print("創建bash控制台...")
               
-              if response.status_code == 200:
-                  print("✅ Web應用已成功重新加載")
-              else:
-                  print(f"⚠️ 重新加載狀態碼: {response.status_code}")
-                  if 'text/html' in response.headers.get('Content-Type', ''):
+              try:
+                  # 請求創建控制台
+                  response = requests.post(
+                      f"{api_base}/consoles/",
+                      headers=headers,
+                      json={
+                          'executable': 'bash',
+                          'arguments': '',
+                          'working_directory': f"/home/{username}"
+                      }
+                  )
+                  
+                  # 檢查是否為HTML響應（表示API令牌問題）
+                  content_type = response.headers.get('Content-Type', '')
+                  if 'text/html' in content_type:
+                      print("❌ 收到HTML響應而非API響應，請檢查API令牌")
+                      print(f"響應內容: {response.text[:200]}...")
+                      return None
+                  
+                  # 正常JSON響應
+                  if response.status_code == 201:
+                      console_id = response.json().get('id')
+                      if console_id:
+                          print(f"✅ 已創建控制台，ID: {console_id}")
+                          return console_id
+                      else:
+                          print("❌ 無法從響應中獲取控制台ID")
+                  else:
+                      print(f"❌ 創建控制台失敗: HTTP {response.status_code}")
+                      print(f"響應: {response.text}")
+                  
+                  return None
+              except Exception as e:
+                  print(f"❌ 創建控制台時發生錯誤: {str(e)}")
+                  return None
+          
+          def run_command(console_id, command):
+              """在控制台中運行命令"""
+              if not console_id:
+                  print(f"❌ 無效的控制台ID，無法運行命令: {command}")
+                  return False
+                  
+              print(f"運行命令: {command}")
+              
+              try:
+                  # 發送命令
+                  response = requests.post(
+                      f"{api_base}/consoles/{console_id}/send_input/",
+                      headers=headers,
+                      json={'input': command}
+                  )
+                  
+                  if response.status_code == 200:
+                      # 等待命令執行
+                      time.sleep(3)
+                      return True
+                  else:
+                      print(f"❌ 發送命令失敗: HTTP {response.status_code}")
+                      return False
+              except Exception as e:
+                  print(f"❌ 運行命令時發生錯誤: {str(e)}")
+                  return False
+          
+          def get_console_output(console_id):
+              """獲取控制台輸出"""
+              if not console_id:
+                  return "無控制台ID"
+                  
+              try:
+                  response = requests.get(
+                      f"{api_base}/consoles/{console_id}/get_latest_output/",
+                      headers=headers
+                  )
+                  
+                  if response.status_code == 200:
+                      return response.text
+                  else:
+                      return f"獲取輸出失敗: HTTP {response.status_code}"
+              except Exception as e:
+                  return f"獲取輸出錯誤: {str(e)}"
+          
+          def reload_webapp():
+              """重新加載Web應用"""
+              print("重新加載Web應用...")
+              
+              try:
+                  response = requests.post(
+                      f"{api_base}/webapps/{username}.pythonanywhere.com/reload/",
+                      headers=headers
+                  )
+                  
+                  # 檢查是否為HTML響應
+                  content_type = response.headers.get('Content-Type', '')
+                  if 'text/html' in content_type:
                       print("⚠️ 收到HTML響應而非API響應，可能是API令牌問題")
-                  print(f"響應內容: {response.text[:200]}...")
-          except Exception as e:
-              print(f"❌ 重新加載Web應用時發生錯誤: {str(e)}")
-              sys.exit(1)
+                      print(f"響應內容: {response.text[:200]}...")
+                      return False
+                  
+                  if response.status_code == 200:
+                      print("✅ Web應用已成功重新加載")
+                      return True
+                  else:
+                      print(f"⚠️ 重新加載失敗: HTTP {response.status_code}")
+                      print(f"響應: {response.text}")
+                      return False
+              except Exception as e:
+                  print(f"❌ 重新加載Web應用時發生錯誤: {str(e)}")
+                  return False
           
-          # 如果API重新加載失敗，告知使用者需要手動重新加載
-          if response.status_code != 200:
-              print("\n⚠️ API重新加載似乎失敗。請在PythonAnywhere控制面板手動重新加載應用。")
-              print(f"訪問: https://www.pythonanywhere.com/user/{username}/webapps/")
+          def deploy():
+              """執行部署流程"""
+              # 1. 上傳部署壓縮包
+              if not upload_file_via_api():
+                  print("❌ 上傳部署文件失敗，終止部署")
+                  sys.exit(1)
+              
+              # 2. 創建控制台
+              console_id = create_console()
+              if not console_id:
+                  print("❌ 創建控制台失敗，嘗試直接重新加載Web應用")
+                  reload_webapp()
+                  sys.exit(1)
+              
+              # 3. 解壓和部署文件
+              print("解壓和部署文件...")
+              commands = [
+                  f"cd /home/{username}",
+                  "mkdir -p learnflask/app/data learnflask/cache",
+                  f"unzip -o deploy.zip -d learnflask",
+                  "find learnflask -name '*.pyc' -delete",
+                  "find learnflask -type d -name '__pycache__' -exec rm -rf {} + 2>/dev/null || true",
+                  "ls -la learnflask/app/templates/common/",
+                  "ls -la learnflask/app/templates/japanese/",
+                  "ls -la learnflask/app/routes/",
+                  f"touch /var/www/{username}_pythonanywhere_com_wsgi.py"
+              ]
+              
+              for cmd in commands:
+                  if not run_command(console_id, cmd):
+                      print(f"⚠️ 命令執行失敗: {cmd}")
+                  
+                  # 獲取並打印輸出
+                  output = get_console_output(console_id)
+                  print(f"輸出: {output}")
+              
+              # 4. 重新加載Web應用
+              reload_webapp()
+              
+              print("✅ 部署完成！")
           
-          print("✅ 部署完成！")
+          # 執行部署
+          deploy()
           EOF
           
           # 設置環境變量並執行Python腳本
           export API_TOKEN="${{ secrets.PA_API_TOKEN }}"
           export PA_USERNAME="${{ secrets.PA_USERNAME }}"
           
-          # 執行重新加載腳本
-          python reload_app.py
+          # 安裝依賴並執行部署腳本
+          pip install requests
+          python deploy_to_pa.py
       
       - name: Final Cleanup
         if: always()
         run: |
           echo "清理完成，部署結束"
           # 刪除敏感文件
-          rm -f deploy.lftp reload_app.py
+          rm -f deploy.zip deploy_to_pa.py
 
