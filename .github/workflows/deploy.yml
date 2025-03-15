@@ -9,6 +9,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # 獲取所有歷史記錄，幫助更好地檢測變更
       
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -37,6 +39,7 @@ jobs:
             -not -path "*/\.*" \
             -not -path "*/venv/*" \
             -not -path "*/cache/*" \
+            -not -path "*/__pycache__/*" \
             -not -path "*/app/data/*" \
             > deploy_files.txt
           
@@ -102,7 +105,7 @@ jobs:
               -H "Authorization: Token $API_TOKEN" || true
           done
           
-          # 步驟3: 上傳所有文件
+          # 步驟3: 上傳所有文件，確保強制覆蓋
           echo "上傳所有文件..."
           TOTAL_FILES=$(wc -l < deploy_files.txt)
           COUNTER=0
@@ -110,12 +113,18 @@ jobs:
           FAILED=0
           ERRORS_LOG=""
           
-          # 創建兩個函數用於上傳文件和重試
+          # 創建函數用於處理文件上傳
           upload_file() {
             local file=$1
             local remote_file="$BASE_DIR/${file#./}"
             
-            # 上傳文件
+            # 首先強制刪除現有文件（如果存在）
+            echo "刪除現有文件: $remote_file"
+            curl -s -X DELETE "$API_BASE/files/path$remote_file" \
+              -H "Authorization: Token $API_TOKEN" > /dev/null
+              
+            # 然後上傳新文件
+            echo "上傳新文件: $file -> $remote_file"
             local status_code=$(curl -s -o /dev/null -w "%{http_code}" \
               -X POST "$API_BASE/files/path$remote_file" \
               -H "Authorization: Token $API_TOKEN" \
@@ -131,6 +140,11 @@ jobs:
             local retry_count=$2
             
             echo "🔄 嘗試重新上傳 $file (嘗試 $retry_count)..."
+            
+            # 強制刪除現有文件
+            curl -v -X DELETE "$API_BASE/files/path$remote_file" \
+              -H "Authorization: Token $API_TOKEN" > /dev/null 2>&1
+              
             # 使用詳細輸出進行調試
             curl -v -X POST "$API_BASE/files/path$remote_file" \
               -H "Authorization: Token $API_TOKEN" \
@@ -146,7 +160,7 @@ jobs:
             # 顯示進度
             echo "[$COUNTER/$TOTAL_FILES] 上傳文件: $file"
             
-            # 上傳文件
+            # 上傳文件（使用改進的上傳函數確保覆蓋）
             STATUS_CODE=$(upload_file "$file")
               
             # 檢查上傳結果
@@ -176,7 +190,35 @@ jobs:
             fi
           done
           
-          # 步驟4: 驗證部署結果
+          # 清理 __pycache__ 和 .pyc 文件
+          echo "清理 Python 緩存文件..."
+          curl -X POST "$API_BASE/consoles/" \
+            -H "Authorization: Token $API_TOKEN" \
+            -d "executable=bash" \
+            -d "arguments=" \
+            -d "working_directory=/home/${{ secrets.PA_USERNAME }}/learnflask" \
+            > console_response.json
+          
+          CONSOLE_ID=$(cat console_response.json | grep -o '"id":[^,]*' | cut -d':' -f2 | tr -d ' "')
+          
+          if [ ! -z "$CONSOLE_ID" ]; then
+            echo "執行清理命令，Console ID: $CONSOLE_ID"
+            # 等待控制台就緒
+            sleep 2
+            
+            # 發送命令清理 __pycache__ 目錄和 .pyc 文件，但排除 data 和 cache 目錄
+            curl -X POST "$API_BASE/consoles/$CONSOLE_ID/send_input/" \
+              -H "Authorization: Token $API_TOKEN" \
+              -d "input=find . -path \"*/app/data\" -prune -o -path \"*/cache\" -prune -o -name \"__pycache__\" -type d -exec rm -rf {} + 2>/dev/null || true"
+              
+            curl -X POST "$API_BASE/consoles/$CONSOLE_ID/send_input/" \
+              -H "Authorization: Token $API_TOKEN" \
+              -d "input=find . -path \"*/app/data\" -prune -o -path \"*/cache\" -prune -o -name \"*.pyc\" -delete"
+          else
+            echo "無法創建控制台，跳過清理步驟"
+          fi
+          
+          # 驗證部署結果
           echo "驗證部署..."
           CRITICAL_DIRS="app/templates app/templates/common app/templates/japanese app/routes"
           for dir in $CRITICAL_DIRS; do
@@ -195,10 +237,24 @@ jobs:
             echo -e "失敗的文件:$ERRORS_LOG"
           fi
           
-          # 重新加載應用
+          # 雙重保險：重新加載 Web 應用
           echo "重新加載 Web 應用..."
+          # 方法1：使用 API 重新加載
           curl -X POST "$API_BASE/webapps/${{ secrets.PA_USERNAME }}.pythonanywhere.com/reload/" \
             -H "Authorization: Token $API_TOKEN"
             
+          # 方法2：觸碰 WSGI 文件
+          if [ ! -z "$CONSOLE_ID" ]; then
+            echo "觸碰 WSGI 文件..."
+            curl -X POST "$API_BASE/consoles/$CONSOLE_ID/send_input/" \
+              -H "Authorization: Token $API_TOKEN" \
+              -d "input=touch /var/www/${{ secrets.PA_USERNAME }}_pythonanywhere_com_wsgi.py"
+          fi
+            
           echo "部署完成!"
+      
+      - name: Final Cleanup
+        if: always()
+        run: |
+          echo "清理完成，部署結束"
 
