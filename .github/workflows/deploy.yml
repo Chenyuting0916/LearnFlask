@@ -35,15 +35,27 @@ jobs:
           if [ ! -s changed_files.txt ]; then
             echo "沒有檢測到變更的文件，將部署關鍵文件..."
             
-            # 創建一個簡單的關鍵文件列表
+            # 創建一個包含關鍵文件的列表，確保包含static資源
             cat > changed_files.txt << EOF
           app/templates/common/layout.html
           app/templates/japanese/index.html
           app/routes/japanese_routes.py
+          app/static/css/style.css
+          app/static/css/production-style.css
+          app/static/js/main.js
           app.py
           config.py
           EOF
           fi
+          
+          # 添加關鍵靜態資源文件
+          echo "添加關鍵靜態資源文件..."
+          # 確保無論如何都會部署CSS文件
+          find app/static -name "*.css" >> changed_files.txt
+          
+          # 去除重複項
+          sort changed_files.txt | uniq > unique_files.txt
+          mv unique_files.txt changed_files.txt
           
           # 列出將要部署的文件
           echo "將部署以下文件:"
@@ -96,12 +108,6 @@ jobs:
                       print(f"❌ 本地文件不存在: {local_path}")
                       return False
                   
-                  # 獲取遠程目錄路徑
-                  remote_dir = os.path.dirname(remote_path)
-                  
-                  # 確保遠程目錄存在
-                  ensure_directory(remote_dir)
-                  
                   # 讀取文件內容
                   with open(local_path, 'rb') as f:
                       file_content = f.read()
@@ -109,15 +115,7 @@ jobs:
                   # 創建上傳URL
                   url = f"{api_base}/files/path{remote_path}"
                   
-                  # 先嘗試刪除現有文件（如果存在）
-                  try:
-                      delete_response = requests.delete(url, headers=headers)
-                      if delete_response.status_code not in (200, 204, 404):
-                          print(f"⚠️ 刪除現有文件失敗: {remote_path} (HTTP {delete_response.status_code})")
-                  except Exception as e:
-                      print(f"⚠️ 刪除文件時出錯: {str(e)}")
-                  
-                  # 上傳新文件
+                  # 上傳文件（不預先刪除，讓API自動處理）
                   response = requests.post(
                       url,
                       headers=headers,
@@ -133,31 +131,6 @@ jobs:
                       return False
               except Exception as e:
                   print(f"❌ 上傳文件時發生錯誤: {str(e)}")
-                  return False
-          
-          def ensure_directory(path):
-              """確保目錄存在"""
-              # 跳過根目錄
-              if path == "/" or not path:
-                  return True
-              
-              # 確保父目錄存在
-              parent = os.path.dirname(path)
-              if parent and parent != "/":
-                  ensure_directory(parent)
-              
-              # 創建目錄
-              try:
-                  url = f"{api_base}/files/path{path}/"
-                  response = requests.post(url, headers=headers)
-                  
-                  if response.status_code in (200, 201, 409):  # 200/201=成功，409=已存在
-                      return True
-                  else:
-                      print(f"⚠️ 創建目錄失敗: {path} (HTTP {response.status_code})")
-                      return False
-              except Exception as e:
-                  print(f"⚠️ 創建目錄時發生錯誤: {str(e)}")
                   return False
           
           def reload_webapp():
@@ -193,13 +166,6 @@ jobs:
               # 處理根目錄
               base_dir = "deploy_files"
               remote_base = f"/home/{username}/learnflask"
-              
-              # 確保根目錄存在
-              ensure_directory(remote_base)
-              
-              # 創建數據和緩存目錄
-              ensure_directory(f"{remote_base}/app/data")
-              ensure_directory(f"{remote_base}/cache")
               
               # 上傳所有文件
               success_count = 0
