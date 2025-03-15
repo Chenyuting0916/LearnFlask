@@ -27,43 +27,54 @@ jobs:
         run: |
           echo "==== 準備部署文件 ===="
           
-          # 創建壓縮文件，排除不需要的目錄
-          echo "創建部署壓縮包..."
-          zip -r deploy.zip . \
-            -x "*.git*" \
-            -x "*__pycache__*" \
-            -x "*.pyc" \
-            -x "venv/*" \
-            -x "cache/*" \
-            -x "app/data/*" \
-            -x ".env"
+          # 獲取已修改的文件清單
+          echo "獲取最近提交修改的文件..."
+          git diff --name-only HEAD~1 HEAD > changed_files.txt
           
-          # 列出壓縮包內容
-          echo "壓縮包內容:"
-          unzip -l deploy.zip | grep -E "app/templates|app/routes" | head -10
+          # 如果沒有找到變更的文件，則使用一個基本的文件列表
+          if [ ! -s changed_files.txt ]; then
+            echo "沒有檢測到變更的文件，將部署關鍵文件..."
+            
+            # 創建一個簡單的關鍵文件列表
+            cat > changed_files.txt << EOF
+          app/templates/common/layout.html
+          app/templates/japanese/index.html
+          app/routes/japanese_routes.py
+          app.py
+          config.py
+          EOF
+          fi
           
-          # 檢查重要文件是否在壓縮包中
-          echo "檢查關鍵文件..."
-          for file in "app/templates/common/layout.html" "app/templates/japanese/index.html" "app/routes/japanese_routes.py"; do
-            if unzip -l deploy.zip | grep -q "$file"; then
-              echo "✅ $file 在壓縮包中"
+          # 列出將要部署的文件
+          echo "將部署以下文件:"
+          cat changed_files.txt
+          
+          # 創建部署清單
+          echo "創建部署清單..."
+          mkdir -p deploy_files
+          while IFS= read -r file; do
+            # 確保文件存在
+            if [ -f "$file" ]; then
+              # 創建目錄結構
+              mkdir -p "deploy_files/$(dirname "$file")"
+              # 複製文件
+              cp "$file" "deploy_files/$file"
+              echo "✅ 準備部署: $file"
             else
-              echo "❌ $file 不在壓縮包中!"
+              echo "⚠️ 文件不存在，跳過: $file"
             fi
-          done
+          done < changed_files.txt
       
-      - name: Upload and deploy to PythonAnywhere
+      - name: Deploy to PythonAnywhere
         run: |
           echo "==== 開始部署到PythonAnywhere ===="
           
           # 創建Python部署腳本
-          cat > deploy_to_pa.py << 'EOF'
+          cat > direct_deploy.py << 'EOF'
           import os
           import sys
-          import time
           import requests
-          import base64
-          import json
+          import time
           
           # 獲取環境變量
           api_token = os.environ.get('API_TOKEN')
@@ -77,123 +88,77 @@ jobs:
           api_base = f"https://www.pythonanywhere.com/api/v0/user/{username}"
           headers = {'Authorization': f'Token {api_token}'}
           
-          def upload_file_via_api():
-              """通過API上傳部署壓縮包"""
-              print("正在上傳部署壓縮包...")
-              
+          def upload_file(local_path, remote_path):
+              """通過API上傳單個文件"""
               try:
-                  # 讀取zip文件
-                  with open('deploy.zip', 'rb') as f:
+                  # 檢查文件是否存在
+                  if not os.path.exists(local_path):
+                      print(f"❌ 本地文件不存在: {local_path}")
+                      return False
+                  
+                  # 獲取遠程目錄路徑
+                  remote_dir = os.path.dirname(remote_path)
+                  
+                  # 確保遠程目錄存在
+                  ensure_directory(remote_dir)
+                  
+                  # 讀取文件內容
+                  with open(local_path, 'rb') as f:
                       file_content = f.read()
                   
-                  # 設置目標路徑
-                  target_path = f"/home/{username}/deploy.zip"
+                  # 創建上傳URL
+                  url = f"{api_base}/files/path{remote_path}"
                   
-                  # 創建上傳文件的URL
-                  url = f"{api_base}/files/path{target_path}"
+                  # 先嘗試刪除現有文件（如果存在）
+                  try:
+                      delete_response = requests.delete(url, headers=headers)
+                      if delete_response.status_code not in (200, 204, 404):
+                          print(f"⚠️ 刪除現有文件失敗: {remote_path} (HTTP {delete_response.status_code})")
+                  except Exception as e:
+                      print(f"⚠️ 刪除文件時出錯: {str(e)}")
                   
-                  # 上傳文件
+                  # 上傳新文件
                   response = requests.post(
                       url,
                       headers=headers,
-                      files={'content': ('deploy.zip', file_content)}
+                      files={'content': (os.path.basename(local_path), file_content)}
                   )
                   
                   if response.status_code in (200, 201):
-                      print(f"✅ 壓縮包已成功上傳到: {target_path}")
+                      print(f"✅ 文件上傳成功: {remote_path}")
                       return True
                   else:
-                      print(f"❌ 上傳失敗: HTTP {response.status_code}")
+                      print(f"❌ 文件上傳失敗: {remote_path} (HTTP {response.status_code})")
                       print(f"響應: {response.text[:200]}...")
                       return False
               except Exception as e:
-                  print(f"❌ 上傳過程中發生錯誤: {str(e)}")
+                  print(f"❌ 上傳文件時發生錯誤: {str(e)}")
                   return False
           
-          def create_console():
-              """創建一個新的bash控制台"""
-              print("創建bash控制台...")
+          def ensure_directory(path):
+              """確保目錄存在"""
+              # 跳過根目錄
+              if path == "/" or not path:
+                  return True
               
-              try:
-                  # 請求創建控制台
-                  response = requests.post(
-                      f"{api_base}/consoles/",
-                      headers=headers,
-                      json={
-                          'executable': 'bash',
-                          'arguments': '',
-                          'working_directory': f"/home/{username}"
-                      }
-                  )
-                  
-                  # 檢查是否為HTML響應（表示API令牌問題）
-                  content_type = response.headers.get('Content-Type', '')
-                  if 'text/html' in content_type:
-                      print("❌ 收到HTML響應而非API響應，請檢查API令牌")
-                      print(f"響應內容: {response.text[:200]}...")
-                      return None
-                  
-                  # 正常JSON響應
-                  if response.status_code == 201:
-                      console_id = response.json().get('id')
-                      if console_id:
-                          print(f"✅ 已創建控制台，ID: {console_id}")
-                          return console_id
-                      else:
-                          print("❌ 無法從響應中獲取控制台ID")
-                  else:
-                      print(f"❌ 創建控制台失敗: HTTP {response.status_code}")
-                      print(f"響應: {response.text}")
-                  
-                  return None
-              except Exception as e:
-                  print(f"❌ 創建控制台時發生錯誤: {str(e)}")
-                  return None
-          
-          def run_command(console_id, command):
-              """在控制台中運行命令"""
-              if not console_id:
-                  print(f"❌ 無效的控制台ID，無法運行命令: {command}")
-                  return False
-                  
-              print(f"運行命令: {command}")
+              # 確保父目錄存在
+              parent = os.path.dirname(path)
+              if parent and parent != "/":
+                  ensure_directory(parent)
               
+              # 創建目錄
               try:
-                  # 發送命令
-                  response = requests.post(
-                      f"{api_base}/consoles/{console_id}/send_input/",
-                      headers=headers,
-                      json={'input': command}
-                  )
+                  url = f"{api_base}/files/path{path}/"
+                  response = requests.post(url, headers=headers)
                   
-                  if response.status_code == 200:
-                      # 等待命令執行
-                      time.sleep(3)
+                  if response.status_code in (200, 201, 409):  # 200/201=成功，409=已存在
                       return True
                   else:
-                      print(f"❌ 發送命令失敗: HTTP {response.status_code}")
+                      print(f"⚠️ 創建目錄失敗: {path} (HTTP {response.status_code})")
                       return False
               except Exception as e:
-                  print(f"❌ 運行命令時發生錯誤: {str(e)}")
+                  print(f"⚠️ 創建目錄時發生錯誤: {str(e)}")
                   return False
-          
-          def get_console_output(console_id):
-              """獲取控制台輸出"""
-              if not console_id:
-                  return "無控制台ID"
-                  
-              try:
-                  response = requests.get(
-                      f"{api_base}/consoles/{console_id}/get_latest_output/",
-                      headers=headers
-                  )
-                  
-                  if response.status_code == 200:
-                      return response.text
-                  else:
-                      return f"獲取輸出失敗: HTTP {response.status_code}"
-              except Exception as e:
-                  return f"獲取輸出錯誤: {str(e)}"
           
           def reload_webapp():
               """重新加載Web應用"""
@@ -225,41 +190,44 @@ jobs:
           
           def deploy():
               """執行部署流程"""
-              # 1. 上傳部署壓縮包
-              if not upload_file_via_api():
-                  print("❌ 上傳部署文件失敗，終止部署")
-                  sys.exit(1)
+              # 處理根目錄
+              base_dir = "deploy_files"
+              remote_base = f"/home/{username}/learnflask"
               
-              # 2. 創建控制台
-              console_id = create_console()
-              if not console_id:
-                  print("❌ 創建控制台失敗，嘗試直接重新加載Web應用")
-                  reload_webapp()
-                  sys.exit(1)
+              # 確保根目錄存在
+              ensure_directory(remote_base)
               
-              # 3. 解壓和部署文件
-              print("解壓和部署文件...")
-              commands = [
-                  f"cd /home/{username}",
-                  "mkdir -p learnflask/app/data learnflask/cache",
-                  f"unzip -o deploy.zip -d learnflask",
-                  "find learnflask -name '*.pyc' -delete",
-                  "find learnflask -type d -name '__pycache__' -exec rm -rf {} + 2>/dev/null || true",
-                  "ls -la learnflask/app/templates/common/",
-                  "ls -la learnflask/app/templates/japanese/",
-                  "ls -la learnflask/app/routes/",
-                  f"touch /var/www/{username}_pythonanywhere_com_wsgi.py"
-              ]
+              # 創建數據和緩存目錄
+              ensure_directory(f"{remote_base}/app/data")
+              ensure_directory(f"{remote_base}/cache")
               
-              for cmd in commands:
-                  if not run_command(console_id, cmd):
-                      print(f"⚠️ 命令執行失敗: {cmd}")
-                  
-                  # 獲取並打印輸出
-                  output = get_console_output(console_id)
-                  print(f"輸出: {output}")
+              # 上傳所有文件
+              success_count = 0
+              failed_count = 0
               
-              # 4. 重新加載Web應用
+              for root, dirs, files in os.walk(base_dir):
+                  for file in files:
+                      # 本地文件路徑
+                      local_path = os.path.join(root, file)
+                      
+                      # 計算相對路徑（相對於部署目錄）
+                      rel_path = os.path.relpath(local_path, base_dir)
+                      
+                      # 遠程路徑
+                      remote_path = f"{remote_base}/{rel_path}"
+                      
+                      # 上傳文件
+                      if upload_file(local_path, remote_path):
+                          success_count += 1
+                      else:
+                          failed_count += 1
+                      
+                      # 避免API限制
+                      time.sleep(0.5)
+              
+              print(f"文件上傳完成: {success_count} 成功, {failed_count} 失敗")
+              
+              # 重新加載Web應用
               reload_webapp()
               
               print("✅ 部署完成！")
@@ -272,14 +240,14 @@ jobs:
           export API_TOKEN="${{ secrets.PA_API_TOKEN }}"
           export PA_USERNAME="${{ secrets.PA_USERNAME }}"
           
-          # 安裝依賴並執行部署腳本
-          pip install requests
-          python deploy_to_pa.py
+          # 執行部署腳本
+          python direct_deploy.py
       
       - name: Final Cleanup
         if: always()
         run: |
           echo "清理完成，部署結束"
           # 刪除敏感文件
-          rm -f deploy.zip deploy_to_pa.py
+          rm -f direct_deploy.py
+          rm -rf deploy_files
 
