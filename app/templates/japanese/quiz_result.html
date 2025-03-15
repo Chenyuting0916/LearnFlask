@@ -1,0 +1,81 @@
+{% extends "common/layout.html" %}
+
+{% block title %}測驗結果 - 日語學習平台{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm mb-4">
+                <div class="card-body text-center">
+                    <h1 class="display-4 mb-3">{{ level }} {{ section }} ({{ year }})</h1>
+                    <h2 class="mb-4">您的得分：<span class="text-{% if score >= 60 %}success{% else %}danger{% endif %}">{{ "%.1f"|format(score) }}分</span></h2>
+                    
+                    {% if score >= 60 %}
+                    <div class="alert alert-success" role="alert">
+                        <h4 class="alert-heading">恭喜通過！</h4>
+                        <p>您已經成功通過了這次測驗。繼續保持！</p>
+                    </div>
+                    {% else %}
+                    <div class="alert alert-warning" role="alert">
+                        <h4 class="alert-heading">繼續加油！</h4>
+                        <p>雖然這次沒有通過，但是通過學習解析，您一定能在下次考試中取得更好的成績。</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">詳細解析</h3>
+                </div>
+                <div class="card-body">
+                    {% for result in results %}
+                    <div class="question-analysis mb-4 pb-4 border-bottom">
+                        <div class="question-header d-flex align-items-center mb-3">
+                            <h4 class="mb-0">問題 {{ loop.index }}</h4>
+                            {% if result.is_correct %}
+                            <span class="badge bg-success ms-3">正確</span>
+                            {% else %}
+                            <span class="badge bg-danger ms-3">錯誤</span>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="question-content mb-3">
+                            {{ result.question|safe|replace('\n', '<br>') }}
+                        </div>
+                        
+                        <div class="answer-details">
+                            <p class="mb-2">
+                                <strong>您的答案：</strong>
+                                <span class="{% if result.is_correct %}text-success{% else %}text-danger{% endif %}">
+                                    {{ result.user_answer or '未作答' }}
+                                </span>
+                            </p>
+                            <p class="mb-3">
+                                <strong>正確答案：</strong>
+                                <span class="text-success">{{ result.correct_answer }}</span>
+                            </p>
+                        </div>
+                        
+                        <div class="explanation">
+                            <h5>解析：</h5>
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    {{ result.explanation|safe|replace('\n', '<br>')|default('暫無解析') }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <div class="d-grid gap-2 mt-4">
+                <a href="{{ url_for('japanese.jlpt_quiz') }}" class="btn btn-primary btn-lg">返回測驗列表</a>
+                <a href="{{ url_for('japanese.index') }}" class="btn btn-outline-secondary">返回首頁</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

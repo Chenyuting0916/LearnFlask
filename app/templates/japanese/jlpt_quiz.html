@@ -1,0 +1,129 @@
+{% extends "common/layout.html" %}
+
+{% block title %}JLPT 真題測驗 - 日語學習平台{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- 測驗選擇頁面 -->
+    {% if not quiz %}
+    <div class="row">
+        <div class="col-12">
+            <h1 class="mb-4">JLPT 真題測驗</h1>
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <div class="row">
+                        {% for level, years in quizzes.items() %}
+                        <div class="col-md-4 mb-4">
+                            <div class="card h-100">
+                                <div class="card-header bg-primary text-white">
+                                    <h3 class="mb-0">{{ level }}</h3>
+                                </div>
+                                <div class="card-body">
+                                    {% for year, sections in years.items() %}
+                                    <h5 class="mt-3">{{ year }}年</h5>
+                                    <div class="list-group">
+                                        {% for section in sections %}
+                                        <a href="{{ url_for('japanese.jlpt_quiz', level=level, year=year, section=section) }}" 
+                                           class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                            {{ section }}
+                                            <span class="badge bg-primary rounded-pill">60分</span>
+                                        </a>
+                                        {% endfor %}
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <!-- 測驗進行頁面 -->
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1>{{ level }} {{ section }} ({{ year }})</h1>
+                <div id="timer" class="h3">
+                    <i class="fas fa-clock me-2"></i>
+                    <span id="minutes">30</span>:<span id="seconds">00</span>
+                </div>
+            </div>
+            
+            <form id="quiz-form" method="post" action="{{ url_for('japanese.submit_quiz') }}">
+                <input type="hidden" name="level" value="{{ level }}">
+                <input type="hidden" name="year" value="{{ year }}">
+                <input type="hidden" name="section" value="{{ section }}">
+                
+                {% for question in quiz.questions %}
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">問題 {{ loop.index }}</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="question-text mb-4">
+                            {{ question.question|safe }}
+                        </div>
+                        
+                        <div class="options">
+                            {% for option in question.options %}
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="radio" 
+                                       name="answer_{{ question.id }}" 
+                                       id="q{{ question.id }}_{{ loop.index0 }}"
+                                       value="{{ loop.index0 }}">
+                                <label class="form-check-label" for="q{{ question.id }}_{{ loop.index0 }}">
+                                    {{ option }}
+                                </label>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+                
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-primary btn-lg">提交答案</button>
+                    <a href="{{ url_for('japanese.jlpt_quiz') }}" class="btn btn-outline-secondary">返回測驗列表</a>
+                </div>
+            </form>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{% if quiz %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // 設置計時器
+    let timeLeft = {{ quiz.time_limit * 60 }};
+    const timerDisplay = document.getElementById('timer');
+    const minutesDisplay = document.getElementById('minutes');
+    const secondsDisplay = document.getElementById('seconds');
+    
+    const timer = setInterval(function() {
+        timeLeft--;
+        
+        const minutes = Math.floor(timeLeft / 60);
+        const seconds = timeLeft % 60;
+        
+        minutesDisplay.textContent = minutes.toString().padStart(2, '0');
+        secondsDisplay.textContent = seconds.toString().padStart(2, '0');
+        
+        if (timeLeft <= 300) { // 最後5分鐘
+            timerDisplay.classList.add('text-danger');
+        }
+        
+        if (timeLeft <= 0) {
+            clearInterval(timer);
+            document.getElementById('quiz-form').submit();
+        }
+    }, 1000);
+});
+</script>
+{% endif %}
+{% endblock %} 

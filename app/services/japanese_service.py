@@ -1,6 +1,9 @@
 import json
 import os
 from app.models.japanese_content import Hiragana, Katakana, Vocabulary, Lesson, Quiz, Question
+import uuid
+from datetime import datetime
+from typing import Dict, List, Tuple, Any, Optional
 
 # 數據文件路徑
 DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'data')
@@ -321,4 +324,238 @@ def get_quizzes(quiz_id=None, level=None, is_premium=None):
         
         result.append(quiz_obj)
     
-    return result 
+    return result
+
+def get_user_quiz_history(user_id):
+    """獲取用戶的測驗歷史記錄"""
+    quiz_history_file = os.path.join(DATA_DIR, 'quiz_history.json')
+    if not os.path.exists(quiz_history_file):
+        return []
+    
+    try:
+        with open(quiz_history_file, 'r', encoding='utf-8') as f:
+            history_data = json.load(f)
+        
+        # 過濾出該用戶的歷史記錄
+        user_history = [h for h in history_data if h['user_id'] == user_id]
+        return sorted(user_history, key=lambda x: x['created_at'], reverse=True)
+    except Exception as e:
+        print(f"讀取測驗歷史記錄時出錯：{str(e)}")
+        return []
+
+def get_user_bookmarks(user_id):
+    """獲取用戶的收藏內容"""
+    bookmarks_file = os.path.join(DATA_DIR, 'bookmarks.json')
+    if not os.path.exists(bookmarks_file):
+        return []
+    
+    try:
+        with open(bookmarks_file, 'r', encoding='utf-8') as f:
+            bookmarks_data = json.load(f)
+        
+        # 過濾出該用戶的收藏
+        user_bookmarks = [b for b in bookmarks_data if b['user_id'] == user_id]
+        return sorted(user_bookmarks, key=lambda x: x['created_at'], reverse=True)
+    except Exception as e:
+        print(f"讀取收藏記錄時出錯：{str(e)}")
+        return []
+
+def add_user_bookmark(user_id, title, url, description):
+    """添加用戶收藏"""
+    bookmarks_file = os.path.join(DATA_DIR, 'bookmarks.json')
+    
+    try:
+        # 讀取現有收藏
+        if os.path.exists(bookmarks_file):
+            with open(bookmarks_file, 'r', encoding='utf-8') as f:
+                bookmarks_data = json.load(f)
+        else:
+            bookmarks_data = []
+        
+        # 創建新的收藏
+        new_bookmark = {
+            'id': str(uuid.uuid4()),
+            'user_id': user_id,
+            'title': title,
+            'url': url,
+            'description': description,
+            'created_at': datetime.now().isoformat()
+        }
+        
+        # 添加到列表
+        bookmarks_data.append(new_bookmark)
+        
+        # 保存更新後的收藏
+        with open(bookmarks_file, 'w', encoding='utf-8') as f:
+            json.dump(bookmarks_data, f, ensure_ascii=False, indent=2)
+        
+        return True, None
+    except Exception as e:
+        return False, str(e)
+
+def add_quiz_history(user_id, quiz_id, score, answers):
+    """添加測驗歷史記錄"""
+    history_file = os.path.join(DATA_DIR, 'quiz_history.json')
+    
+    try:
+        # 讀取現有歷史記錄
+        if os.path.exists(history_file):
+            with open(history_file, 'r', encoding='utf-8') as f:
+                history_data = json.load(f)
+        else:
+            history_data = []
+        
+        # 創建新的歷史記錄
+        new_history = {
+            'id': str(uuid.uuid4()),
+            'user_id': user_id,
+            'quiz_id': quiz_id,
+            'score': score,
+            'answers': answers,
+            'created_at': datetime.now().isoformat()
+        }
+        
+        # 添加到列表
+        history_data.append(new_history)
+        
+        # 保存更新後的歷史記錄
+        with open(history_file, 'w', encoding='utf-8') as f:
+            json.dump(history_data, f, ensure_ascii=False, indent=2)
+        
+        return True, None
+    except Exception as e:
+        return False, str(e)
+
+class JLPTQuiz:
+    def __init__(self, level, year, section):
+        self.level = level  # N1-N5
+        self.year = year    # 考試年份
+        self.section = section  # 文字・語彙、文法、読解、聴解
+
+    @staticmethod
+    def get_available_quizzes():
+        """獲取所有可用的 JLPT 真題測驗"""
+        # 從 JSON 文件中讀取可用的測驗
+        try:
+            jlpt_quizzes_file = os.path.join(DATA_DIR, 'jlpt_quizzes.json')
+            if os.path.exists(jlpt_quizzes_file):
+                with open(jlpt_quizzes_file, 'r', encoding='utf-8') as f:
+                    jlpt_quizzes = json.load(f)
+                
+                # 構建可用測驗的結構
+                available_quizzes = {}
+                for level, years_data in jlpt_quizzes.items():
+                    available_quizzes[level] = {}
+                    for year, sections_data in years_data.items():
+                        available_quizzes[level][year] = list(sections_data.keys())
+                
+                return available_quizzes
+        except Exception as e:
+            print(f"獲取可用測驗時出錯：{str(e)}")
+        
+        # 如果讀取失敗，返回預設值
+        return {
+            'N1': {
+                '2023': ['文字・語彙', '文法', '読解'],
+                '2022': ['文字・語彙']
+            },
+            'N2': {
+                '2023': ['文字・語彙']
+            },
+            'N3': {
+                '2023': ['文字・語彙']
+            }
+        }
+
+    def get_quiz_questions(self):
+        """獲取指定測驗的題目"""
+        # 從 JSON 文件中讀取題目
+        try:
+            jlpt_quizzes_file = os.path.join(DATA_DIR, 'jlpt_quizzes.json')
+            if os.path.exists(jlpt_quizzes_file):
+                with open(jlpt_quizzes_file, 'r', encoding='utf-8') as f:
+                    jlpt_quizzes = json.load(f)
+                
+                # 獲取特定測驗的題目
+                if (self.level in jlpt_quizzes and 
+                    self.year in jlpt_quizzes[self.level] and 
+                    self.section in jlpt_quizzes[self.level][self.year]):
+                    return jlpt_quizzes[self.level][self.year][self.section]
+        except Exception as e:
+            print(f"獲取測驗題目時出錯：{str(e)}")
+        
+        # 如果讀取失敗或找不到指定測驗，返回一個空的測驗
+        return {
+            'questions': [
+                {
+                    'id': 1,
+                    'type': 'multiple_choice',
+                    'question': '次の（　　）に入る最もよいものを、１・２・３・４から一つ選びなさい。\n\n申し訳ございませんが、指定された測驗暫時無法找到。',
+                    'options': [
+                        '請選擇其他測驗',
+                        '請稍後再試',
+                        '請聯繫管理員',
+                        '請返回測驗列表'
+                    ],
+                    'correct_answer': 3,
+                    'explanation': '這是一個預設題目，表示無法找到指定的測驗題目。請返回測驗列表重新選擇。'
+                }
+            ],
+            'time_limit': 10,
+            'total_score': 100
+        }
+
+    def submit_answer(self, user_id, question_id, answer):
+        """提交答案"""
+        # 驗證答案並記錄結果
+        pass
+
+    def get_quiz_result(self, user_id):
+        """獲取測驗結果和詳細解析"""
+        pass
+
+def get_jlpt_quizzes():
+    """獲取所有可用的 JLPT 測驗"""
+    return JLPTQuiz.get_available_quizzes()
+
+def get_jlpt_quiz(level, year, section):
+    """獲取特定的 JLPT 測驗"""
+    quiz = JLPTQuiz(level, year, section)
+    return quiz.get_quiz_questions()
+
+def save_quiz_result(user_id, quiz_type, level, year, section, score, answers):
+    """保存 JLPT 測驗結果"""
+    quiz_history_file = os.path.join(DATA_DIR, 'quiz_history.json')
+    
+    try:
+        # 讀取現有歷史記錄
+        if os.path.exists(quiz_history_file):
+            with open(quiz_history_file, 'r', encoding='utf-8') as f:
+                history_data = json.load(f)
+        else:
+            history_data = []
+        
+        # 創建新的歷史記錄
+        new_history = {
+            'id': str(uuid.uuid4()),
+            'user_id': user_id,
+            'quiz_type': quiz_type,
+            'level': level,
+            'year': year,
+            'section': section,
+            'score': score,
+            'answers': answers,
+            'created_at': datetime.now().isoformat()
+        }
+        
+        # 添加到列表
+        history_data.append(new_history)
+        
+        # 保存更新後的歷史記錄
+        with open(quiz_history_file, 'w', encoding='utf-8') as f:
+            json.dump(history_data, f, ensure_ascii=False, indent=2)
+        
+        return True, None
+    except Exception as e:
+        print(f"保存測驗結果時出錯：{str(e)}")
+        return False, str(e) 

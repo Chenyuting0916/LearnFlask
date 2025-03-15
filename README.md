@@ -1,27 +1,48 @@
-# 日本語N1単語学習 / Japanese N1 Vocabulary Learning
+# 日本語学習平台 / Japanese Learning Platform
 
-一個簡單的日語N1單字學習網站，使用 Flask 框架開發。
-A simple Japanese N1 vocabulary learning website built with Flask.
+一個全面的日語學習平台，提供假名、單字、測驗等多種學習功能。
+A comprehensive Japanese learning platform offering hiragana, vocabulary, quizzes and more.
 
-## Live Demo 線上演示 在线演示
+## 線上演示 / Live Demo
 
-Visit the live website at: [https://cyt.pythonanywhere.com](https://cyt.pythonanywhere.com)
+訪問網站：[https://cyt.pythonanywhere.com](https://cyt.pythonanywhere.com)
 
 ## 功能特點 / Features
 
-- 從 Jisho.org 自動抓取 N1 單字 / Automatically fetches N1 vocabulary from Jisho.org
-- 支持顯示/隱藏單字含義 / Show/hide word meanings
-- 記錄已學習的單字 / Track learned words
-- 支持重新載入單字庫 / Reload vocabulary database
-- 響應式設計，支持手機瀏覽 / Responsive design for mobile devices
+### 基礎學習 / Basic Learning
+- 平假名和片假名練習 / Hiragana and Katakana practice
+- 基礎單字學習 / Basic vocabulary learning
+- 自動記錄學習進度 / Automatic progress tracking
+
+### 進階功能 / Advanced Features
+- 專業測驗系統（付費會員） / Professional quiz system (paid members)
+- 個人化學習記錄 / Personalized learning history
+- 詳細的學習統計 / Detailed learning statistics
+
+### 技術特點 / Technical Features
+- 響應式設計，支持各種設備 / Responsive design for all devices
+- 數據自動同步 / Automatic data synchronization
+- 安全的用戶認證系統 / Secure user authentication system
 
 
 ## 技術棧 / Tech Stack
 
+### 後端 / Backend
 - Python 3.10+
-- Flask
-- BeautifulSoup4
+- Flask 3.0.2
+- Werkzeug 3.0.1
+- Jinja2 3.1.3
+
+### 前端 / Frontend
 - HTML5/CSS3/JavaScript
+- Bootstrap 5
+- jQuery
+
+### 工具和依賴 / Tools & Dependencies
+- BeautifulSoup4 4.12.3
+- Requests 2.31.0
+- WTForms 3.1.2
+- Gunicorn 21.2.0
 
 ## 安裝步驟 / Installation
 
@@ -43,7 +64,12 @@ venv\Scripts\activate     # Windows
 pip install -r requirements.txt
 ```
 
-4. 運行應用 / Run the application:
+4. 初始化數據目錄 / Initialize data directories:
+```bash
+mkdir -p app/data cache
+```
+
+5. 運行應用 / Run the application:
 ```bash
 python app.py
 ```
@@ -51,48 +77,53 @@ python app.py
 ## 部署 / Deployment
 
 ### 本地部署 / Local Deployment
-
-1. 確保已安裝 Python 3.10 或更高版本 / Ensure Python 3.10+ is installed
+1. 確保已安裝 Python 3.10+ / Ensure Python 3.10+ is installed
 2. 按照安裝步驟設置環境 / Follow installation steps
 3. 運行 `python app.py` / Run `python app.py`
 4. 訪問 `http://localhost:5000` / Visit `http://localhost:5000`
 
 ### PythonAnywhere 部署 / PythonAnywhere Deployment
-
-1. 在 PythonAnywhere 創建一個新的 Web 應用 / Create a new Web app on PythonAnywhere
-2. 選擇 Flask 框架 / Choose Flask framework
-3. 設置 Python 版本為 3.10 / Set Python version to 3.10
-4. 上傳代碼到 PythonAnywhere / Upload code to PythonAnywhere
-5. 設置虛擬環境並安裝依賴 / Set up virtual environment and install dependencies
-6. 配置 WSGI 文件 / Configure WSGI file
-7. 重新加載應用 / Reload the application
+1. 在 PythonAnywhere 創建 Web 應用 / Create a Web app on PythonAnywhere
+2. 選擇 Flask 框架和 Python 3.10 / Choose Flask framework and Python 3.10
+3. 設置以下環境變量 / Set the following environment variables:
+   - `FLASK_ENV`: `production`
+   - `FLASK_SECRET_KEY`: `your-secret-key`
 
 ### GitHub Actions 自動部署 / GitHub Actions Auto Deployment
+配置以下 Secrets / Configure the following Secrets:
+- `PA_USERNAME`: PythonAnywhere 用戶名 / PythonAnywhere username
+- `PA_API_TOKEN`: PythonAnywhere API Token
 
-1. 在 GitHub 倉庫設置中添加以下 Secrets / Add the following Secrets to GitHub repository settings:
-   - `PA_USERNAME`: PythonAnywhere 用戶名 / PythonAnywhere username
-   - `PA_API_TOKEN`: PythonAnywhere API Token
+## 開發指南 / Development Guide
 
-2. 推送代碼到 main 分支時會自動部署 / Code will be automatically deployed when pushed to main branch
+### 代碼結構 / Code Structure
+```
+learnflask/
+├── app/
+│   ├── data/          # 學習資源數據
+│   ├── routes/        # 路由處理
+│   ├── services/      # 業務邏輯
+│   ├── static/        # 靜態文件
+│   └── templates/     # 模板文件
+├── cache/             # 緩存文件
+├── config/           # 配置文件
+├── tests/           # 測試文件
+└── requirements.txt  # 依賴清單
+```
 
-## 使用說明 / Usage
+### 添加新功能 / Adding New Features
+1. 在相應目錄創建新文件 / Create new files in appropriate directories
+2. 更新路由和服務 / Update routes and services
+3. 添加測試用例 / Add test cases
+4. 更新文檔 / Update documentation
 
-1. 打開網站後會顯示一個隨機的 N1 單字 / A random N1 word will be displayed when you open the website
-2. 點擊「顯示含義」按鈕查看單字的中文含義 / Click "Show Meaning" to view the word's meaning
-3. 點擊「下一個單字」按鈕學習下一個單字 / Click "Next Word" to learn the next word
-4. 點擊「重新載入單字庫」可以重新獲取新的單字 / Click "Reload Vocabulary" to fetch new words
-5. 右側面板顯示已學習的單字列表 / Learned words are displayed in the right panel
+## 貢獻指南 / Contributing
 
-## 注意事項 / Notes
-
-- 首次運行時會從 Jisho.org 抓取單字，可能需要一些時間 / First run will fetch words from Jisho.org, which may take some time
-- 如果抓取失敗，會使用默認的單字庫 / If fetching fails, default vocabulary will be used
-- 建議使用現代瀏覽器訪問 / Modern browsers are recommended
-
-## 貢獻 / Contributing
-
-歡迎提交 Issue 和 Pull Request！
-Feel free to submit issues and pull requests!
+歡迎提交 Issue 和 Pull Request！在提交之前，請：
+1. 檢查現有的 Issue 和 PR
+2. 遵循代碼風格指南
+3. 添加適當的測試
+4. 更新相關文檔
 
 ## 授權 / License
 

@@ -3,378 +3,168 @@
 {% block title %}訂閱方案 - 日語學習平台{% endblock %}
 
 {% block content %}
-<div class="container">
-    <h1 class="mb-4 text-center">選擇最適合您的學習方案</h1>
-    <p class="lead text-center mb-5">升級您的訂閱，解鎖更多學習資源，加速您的日語學習之旅</p>
-    
-    <!-- 訂閱計劃卡片 -->
-    <div class="row mb-5">
-        <!-- 免費方案 -->
-        <div class="col-md-4 mb-4">
-            <div class="card subscription-card h-100">
-                <div class="card-header bg-white text-center py-4">
-                    <h3>免費方案</h3>
-                </div>
-                <div class="card-body">
-                    <div class="text-center mb-4">
-                        <span class="price">¥0</span> / 月
-                    </div>
-                    <ul class="list-group list-group-flush mb-4">
-                        <li class="list-group-item"><i class="fas fa-check text-success me-2"></i> 基礎平假名和片假名學習</li>
-                        <li class="list-group-item"><i class="fas fa-check text-success me-2"></i> 基本詞彙庫（200個詞彙）</li>
-                        <li class="list-group-item"><i class="fas fa-check text-success me-2"></i> 基礎測驗</li>
-                        <li class="list-group-item text-muted"><i class="fas fa-times text-danger me-2"></i> 高級課程</li>
-                        <li class="list-group-item text-muted"><i class="fas fa-times text-danger me-2"></i> 發音反饋</li>
-                        <li class="list-group-item text-muted"><i class="fas fa-times text-danger me-2"></i> JLPT考試準備材料</li>
-                        <li class="list-group-item text-muted"><i class="fas fa-times text-danger me-2"></i> 讀寫能力評估</li>
-                    </ul>
-                </div>
-                <div class="card-footer bg-white text-center py-4 border-0">
-                    {% if user_id and user_subscription == 'free' %}
-                        <button class="btn btn-outline-secondary btn-lg px-5" disabled>當前方案</button>
-                    {% else %}
-                        <a href="{{ url_for('auth.register') }}" class="btn btn-outline-primary btn-lg px-5">註冊免費帳戶</a>
-                    {% endif %}
-                </div>
+<!-- 頂部橫幅 -->
+<div class="jumbotron bg-light p-4 rounded-3 mb-4">
+    <div class="container">
+        <h1 class="display-5">選擇最適合您的學習方案</h1>
+        <p class="lead">升級您的訂閱，解鎖更多學習資源，加速您的日語學習之旅</p>
+    </div>
+</div>
+
+<!-- 訂閱方案 -->
+<div class="row mb-4">
+    <!-- 免費方案 -->
+    <div class="col-md-6 mb-3">
+        <div class="card h-100">
+            <div class="card-header text-center bg-white">
+                <h4>免費會員</h4>
             </div>
-        </div>
-        
-        <!-- 基本方案 -->
-        <div class="col-md-4 mb-4">
-            <div class="card subscription-card h-100 border-primary">
-                <div class="card-header bg-primary text-white text-center py-4">
-                    <h3>基本方案</h3>
-                    <span class="badge bg-warning position-absolute top-0 end-0 translate-middle">最受歡迎</span>
-                </div>
-                <div class="card-body">
-                    <div class="text-center mb-4">
-                        <span class="price">¥49.99</span> / 月
-                    </div>
-                    <ul class="list-group list-group-flush mb-4">
-                        <li class="list-group-item"><i class="fas fa-check text-success me-2"></i> 完整平假名和片假名學習</li>
-                        <li class="list-group-item"><i class="fas fa-check text-success me-2"></i> 擴展詞彙庫（2000+詞彙）</li>
-                        <li class="list-group-item"><i class="fas fa-check text-success me-2"></i> 所有等級測驗</li>
-                        <li class="list-group-item"><i class="fas fa-check text-success me-2"></i> 中級課程</li>
-                        <li class="list-group-item"><i class="fas fa-check text-success me-2"></i> 基本發音反饋</li>
-                        <li class="list-group-item text-muted"><i class="fas fa-times text-danger me-2"></i> JLPT專業考試準備</li>
-                        <li class="list-group-item text-muted"><i class="fas fa-times text-danger me-2"></i> 讀寫能力評估</li>
-                    </ul>
-                </div>
-                <div class="card-footer bg-white text-center py-4 border-0">
-                    {% if user_id and user_subscription == 'basic' %}
-                        <button class="btn btn-primary btn-lg px-5" disabled>當前方案</button>
-                    {% elif user_id %}
-                        <a href="{{ url_for('auth.payment', type='basic', months=1) }}" class="btn btn-primary btn-lg px-5">立即升級</a>
-                    {% else %}
-                        <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-lg px-5">選擇此方案</a>
-                    {% endif %}
-                </div>
+            <div class="card-body">
+                <h5 class="card-title text-center mb-3">¥0 / 月</h5>
+                <ul class="list-group list-group-flush mb-4">
+                    <li class="list-group-item"><i class="fas fa-check text-success me-2"></i> 基礎假名學習</li>
+                    <li class="list-group-item"><i class="fas fa-check text-success me-2"></i> 限量基礎詞彙</li>
+                    <li class="list-group-item text-muted"><i class="fas fa-times text-danger me-2"></i> 測驗功能</li>
+                    <li class="list-group-item text-muted"><i class="fas fa-times text-danger me-2"></i> 詳細學習統計</li>
+                    <li class="list-group-item text-muted"><i class="fas fa-times text-danger me-2"></i> 個人化學習記錄</li>
+                </ul>
             </div>
-        </div>
-        
-        <!-- 高級方案 -->
-        <div class="col-md-4 mb-4">
-            <div class="card subscription-card h-100">
-                <div class="card-header bg-warning text-dark text-center py-4">
-                    <h3>高級方案</h3>
-                </div>
-                <div class="card-body">
-                    <div class="text-center mb-4">
-                        <span class="price">¥99.99</span> / 月
-                    </div>
-                    <ul class="list-group list-group-flush mb-4">
-                        <li class="list-group-item"><i class="fas fa-check text-success me-2"></i> 所有基本方案功能</li>
-                        <li class="list-group-item"><i class="fas fa-check text-success me-2"></i> 高級詞彙庫（5000+詞彙）</li>
-                        <li class="list-group-item"><i class="fas fa-check text-success me-2"></i> 高級課程</li>
-                        <li class="list-group-item"><i class="fas fa-check text-success me-2"></i> 專業發音反饋</li>
-                        <li class="list-group-item"><i class="fas fa-check text-success me-2"></i> JLPT專業考試準備（N5-N1）</li>
-                        <li class="list-group-item"><i class="fas fa-check text-success me-2"></i> AI讀寫能力評估</li>
-                        <li class="list-group-item"><i class="fas fa-check text-success me-2"></i> 個人化學習計劃</li>
-                    </ul>
-                </div>
-                <div class="card-footer bg-white text-center py-4 border-0">
-                    {% if user_id and user_subscription == 'premium' %}
-                        <button class="btn btn-warning btn-lg px-5" disabled>當前方案</button>
-                    {% elif user_id %}
-                        <a href="{{ url_for('auth.payment', type='premium', months=1) }}" class="btn btn-warning btn-lg px-5">立即升級</a>
-                    {% else %}
-                        <a href="{{ url_for('auth.register') }}" class="btn btn-warning btn-lg px-5">選擇此方案</a>
-                    {% endif %}
-                </div>
+            <div class="card-footer text-center bg-white">
+                {% if user_id and user_subscription == 'free' %}
+                    <button class="btn btn-outline-secondary" disabled>當前方案</button>
+                {% else %}
+                    <a href="{{ url_for('auth.register') }}" class="btn btn-outline-primary">註冊免費帳戶</a>
+                {% endif %}
             </div>
         </div>
     </div>
     
-    <!-- 階段式付款選項 -->
-    <div class="subscription-duration my-5">
-        <h2 class="text-center mb-4">選擇訂閱時長，享受更多優惠</h2>
-        <div class="row justify-content-center mb-5">
-            <div class="col-lg-8">
-                <div class="card">
-                    <div class="card-body">
-                        <div class="row text-center">
-                            <div class="col-md-4 mb-3 mb-md-0">
-                                <div class="form-check d-inline-block">
-                                    <input class="form-check-input" type="radio" name="duration" id="monthly" value="1" checked>
-                                    <label class="form-check-label" for="monthly">
-                                        <div class="duration-option p-3">
-                                            <h4>月付</h4>
-                                            <p class="mb-0">標準月費</p>
-                                            <p class="mb-0"><small>靈活訂閱</small></p>
-                                        </div>
-                                    </label>
-                                </div>
-                            </div>
-                            <div class="col-md-4 mb-3 mb-md-0">
-                                <div class="form-check d-inline-block">
-                                    <input class="form-check-input" type="radio" name="duration" id="quarterly" value="3">
-                                    <label class="form-check-label" for="quarterly">
-                                        <div class="duration-option p-3">
-                                            <h4>季付</h4>
-                                            <p class="mb-0">節省10%</p>
-                                            <p class="mb-0"><small>適合短期學習</small></p>
-                                        </div>
-                                    </label>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="form-check d-inline-block">
-                                    <input class="form-check-input" type="radio" name="duration" id="yearly" value="12">
-                                    <label class="form-check-label" for="yearly">
-                                        <div class="duration-option p-3">
-                                            <h4>年付</h4>
-                                            <p class="mb-0">節省20%</p>
-                                            <p class="mb-0"><small>最佳性價比</small></p>
-                                            <span class="badge bg-warning position-absolute top-0 end-0 mt-2 me-2">推薦</span>
-                                        </div>
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+    <!-- 付費會員 -->
+    <div class="col-md-6 mb-3">
+        <div class="card h-100 border-primary">
+            <div class="card-header text-center bg-primary text-white">
+                <h4>付費會員</h4>
+                <span class="badge bg-warning position-absolute top-0 end-0 mt-2 me-2">推薦</span>
+            </div>
+            <div class="card-body">
+                <h5 class="card-title text-center mb-3">¥49.99 / 月</h5>
+                <ul class="list-group list-group-flush mb-4">
+                    <li class="list-group-item"><i class="fas fa-check text-success me-2"></i> 完整假名學習</li>
+                    <li class="list-group-item"><i class="fas fa-check text-success me-2"></i> 無限制詞彙學習</li>
+                    <li class="list-group-item"><i class="fas fa-check text-success me-2"></i> 專業測驗系統</li>
+                    <li class="list-group-item"><i class="fas fa-check text-success me-2"></i> 詳細學習統計</li>
+                    <li class="list-group-item"><i class="fas fa-check text-success me-2"></i> 個人化學習記錄</li>
+                </ul>
+            </div>
+            <div class="card-footer text-center bg-white">
+                {% if user_id and user_subscription == 'premium' %}
+                    <button class="btn btn-primary" disabled>當前方案</button>
+                {% elif user_id %}
+                    <a href="{{ url_for('auth.payment', type='premium', months=1) }}" class="btn btn-primary">立即升級</a>
+                {% else %}
+                    <a href="{{ url_for('auth.register') }}" class="btn btn-primary">選擇此方案</a>
+                {% endif %}
             </div>
         </div>
     </div>
-    
-    <!-- 訂閱優勢 -->
-    <div class="subscription-benefits mb-5">
-        <h2 class="text-center mb-4">訂閱會員的專屬優勢</h2>
-        <div class="row">
-            <div class="col-md-4 mb-4">
-                <div class="card h-100">
-                    <div class="card-body text-center">
-                        <i class="fas fa-graduation-cap fa-3x text-primary mb-3"></i>
-                        <h3>專業課程內容</h3>
-                        <p>由日語教育專家精心設計的課程，涵蓋從初級到高級的全面學習內容，幫助您系統地學習日語。</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4 mb-4">
-                <div class="card h-100">
-                    <div class="card-body text-center">
-                        <i class="fas fa-comments fa-3x text-primary mb-3"></i>
-                        <h3>發音反饋</h3>
-                        <p>系統分析您的發音，提供精確的反饋和改進建議，幫助您像日本人一樣說日語。</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4 mb-4">
-                <div class="card h-100">
-                    <div class="card-body text-center">
-                        <i class="fas fa-chart-line fa-3x text-primary mb-3"></i>
-                        <h3>進度追踪</h3>
-                        <p>詳細的學習數據和進度分析，幫助您了解自己的強項和弱點，更有效地安排學習計劃。</p>
-                    </div>
-                </div>
+</div>
+
+<!-- 會員權益說明 -->
+<div class="row mb-4">
+    <div class="col-md-4 mb-3">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-tasks fa-2x text-primary mb-2"></i>
+                <h4>專業測驗系統</h4>
+                <p class="card-text">全面的測驗功能，幫助您檢驗學習成果，掌握自己的學習進度。</p>
             </div>
         </div>
     </div>
-    
-    <!-- 常見問題 -->
-    <div class="subscription-faq mb-5">
-        <h2 class="text-center mb-4">常見問題</h2>
-        <div class="row justify-content-center">
-            <div class="col-lg-8">
-                <div class="accordion" id="subscriptionFAQ">
-                    <div class="accordion-item">
-                        <h2 class="accordion-header" id="headingOne">
-                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne">
-                                如何選擇適合我的方案？
-                            </button>
-                        </h2>
-                        <div id="collapseOne" class="accordion-collapse collapse show" data-bs-parent="#subscriptionFAQ">
-                            <div class="accordion-body">
-                                如果您是初學者並想嘗試學習日語，免費方案是一個好的開始。如果您已經有基礎並希望系統地學習，推薦基本方案。如果您有明確的學習目標（如JLPT考試）或需要個性化學習計劃，高級方案最為適合。
-                            </div>
-                        </div>
-                    </div>
-                    <div class="accordion-item">
-                        <h2 class="accordion-header" id="headingTwo">
-                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo">
-                                我可以隨時取消訂閱嗎？
-                            </button>
-                        </h2>
-                        <div id="collapseTwo" class="accordion-collapse collapse" data-bs-parent="#subscriptionFAQ">
-                            <div class="accordion-body">
-                                是的，您可以隨時在帳戶設置中取消訂閱。取消後，您將保持當前訂閱直到已付費期間結束。我們不提供部分退款，但您可以繼續使用所有功能直到訂閱期結束。
-                            </div>
-                        </div>
-                    </div>
-                    <div class="accordion-item">
-                        <h2 class="accordion-header" id="headingThree">
-                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree">
-                                支持哪些付款方式？
-                            </button>
-                        </h2>
-                        <div id="collapseThree" class="accordion-collapse collapse" data-bs-parent="#subscriptionFAQ">
-                            <div class="accordion-body">
-                                我們支持多種付款方式，包括信用卡（Visa、MasterCard、American Express）、PayPal、支付寶和微信支付。所有交易均經過安全加密處理，確保您的支付信息安全。
-                            </div>
-                        </div>
-                    </div>
-                    <div class="accordion-item">
-                        <h2 class="accordion-header" id="headingFour">
-                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour">
-                                可以在多個設備上使用同一帳戶嗎？
-                            </button>
-                        </h2>
-                        <div id="collapseFour" class="accordion-collapse collapse" data-bs-parent="#subscriptionFAQ">
-                            <div class="accordion-body">
-                                是的，您可以在多個設備上使用同一帳戶，包括電腦、平板和手機。我們的學習進度將自動同步，讓您可以隨時隨地繼續學習。
-                            </div>
-                        </div>
-                    </div>
-                </div>
+    <div class="col-md-4 mb-3">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-chart-line fa-2x text-primary mb-2"></i>
+                <h4>詳細學習統計</h4>
+                <p class="card-text">追蹤您的學習進度，提供詳細的數據分析，幫助您更有效地學習。</p>
             </div>
         </div>
     </div>
-    
-    <!-- 行動呼籲 -->
-    <div class="text-center py-5 mb-5 bg-light rounded-3">
-        <h2 class="mb-3">準備好開始您的日語學習之旅了嗎？</h2>
-        <p class="lead mb-4">立即升級，獲取專業學習資源，更快掌握日語！</p>
-        {% if not user_id %}
-            <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-lg me-2">註冊帳戶</a>
-        {% elif user_subscription == 'free' %}
-            <a href="{{ url_for('auth.payment', type='basic', months=1) }}" class="btn btn-primary btn-lg me-2">立即升級</a>
-            <a href="{{ url_for('japanese.index') }}" class="btn btn-outline-primary btn-lg">繼續免費學習</a>
-        {% endif %}
+    <div class="col-md-4 mb-3">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-user-graduate fa-2x text-primary mb-2"></i>
+                <h4>個人化學習</h4>
+                <p class="card-text">根據您的學習進度和表現，提供個人化的學習建議和內容。</p>
+            </div>
+        </div>
     </div>
-    
-    <!-- 學員評價 -->
-    <div class="testimonials mb-5">
-        <h2 class="text-center mb-4">學員評價</h2>
-        <div class="row">
-            <div class="col-md-4 mb-4">
-                <div class="card h-100">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center mb-3">
-                            <img src="https://via.placeholder.com/60" class="rounded-circle me-3" alt="用戶頭像">
-                            <div>
-                                <h5 class="mb-0">劉小華</h5>
-                                <div class="text-warning">
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                </div>
-                            </div>
+</div>
+
+<!-- 常見問題 -->
+<div class="bg-light p-4 rounded-3 mb-4">
+    <h3 class="text-center mb-4">常見問題</h3>
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="accordion" id="subscriptionFAQ">
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne">
+                            如何升級為付費會員？
+                        </button>
+                    </h2>
+                    <div id="collapseOne" class="accordion-collapse collapse show" data-bs-parent="#subscriptionFAQ">
+                        <div class="accordion-body">
+                            只需點擊「立即升級」按鈕，完成付款流程即可升級為付費會員。升級後即可使用所有高級功能。
                         </div>
-                        <p class="card-text">"升級到高級方案後，我的日語學習進度飛速提升。JLPT考試準備材料幫助我順利通過了N3考試。個性化學習計劃讓我的學習更有針對性，非常值得！"</p>
                     </div>
                 </div>
-            </div>
-            <div class="col-md-4 mb-4">
-                <div class="card h-100">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center mb-3">
-                            <img src="https://via.placeholder.com/60" class="rounded-circle me-3" alt="用戶頭像">
-                            <div>
-                                <h5 class="mb-0">張志明</h5>
-                                <div class="text-warning">
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star-half-alt"></i>
-                                </div>
-                            </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo">
+                            付費會員可以取消訂閱嗎？
+                        </button>
+                    </h2>
+                    <div id="collapseTwo" class="accordion-collapse collapse" data-bs-parent="#subscriptionFAQ">
+                        <div class="accordion-body">
+                            是的，您可以隨時在個人資料頁面中取消訂閱。取消後，您可以繼續使用付費功能直到當前訂閱期結束。
                         </div>
-                        <p class="card-text">"作為一名商務人士，我需要快速掌握日語以便與日本客戶溝通。基本方案的詞彙和會話課程非常實用，幫助我在短時間內達到了基本交流能力。"</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4 mb-4">
-                <div class="card h-100">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center mb-3">
-                            <img src="https://via.placeholder.com/60" class="rounded-circle me-3" alt="用戶頭像">
-                            <div>
-                                <h5 class="mb-0">王美玲</h5>
-                                <div class="text-warning">
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                </div>
-                            </div>
-                        </div>
-                        <p class="card-text">"作為日本動漫和文化愛好者，這個平台的高級方案讓我能夠理解原版日語內容。發音反饋功能特別好用，幫助我糾正了很多發音問題。"</p>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<!-- 行動呼籲 -->
+<div class="text-center mb-4">
+    <h3 class="mb-2">立即升級，開啟全新的學習體驗</h3>
+    <p class="lead mb-3">解鎖所有進階功能，加速您的日語學習之旅！</p>
+    {% if not user_id %}
+        <a href="{{ url_for('auth.register') }}" class="btn btn-primary me-2">免費註冊</a>
+        <a href="{{ url_for('auth.login') }}" class="btn btn-outline-primary">登錄</a>
+    {% elif user_subscription != 'premium' %}
+        <a href="{{ url_for('auth.payment', type='premium', months=1) }}" class="btn btn-primary">立即升級</a>
+    {% endif %}
+</div>
 {% endblock %}
 
 {% block extra_css %}
 <style>
-    .price {
-        font-size: 2.5rem;
-        font-weight: 700;
-        color: #4361ee;
-    }
-    
-    .duration-option {
-        border: 2px solid #dee2e6;
-        border-radius: 10px;
-        transition: all 0.3s ease;
-        position: relative;
-        min-width: 150px;
-    }
-    
-    .form-check-input:checked + .form-check-label .duration-option {
-        border-color: #4361ee;
-        background-color: rgba(67, 97, 238, 0.05);
-    }
-    
-    .form-check {
-        padding-left: 0;
-    }
-    
-    .form-check-input {
-        position: absolute;
-        opacity: 0;
-    }
+.container {
+    max-width: 960px;
+}
+.card {
+    transition: transform 0.2s;
+}
+.card:hover {
+    transform: translateY(-5px);
+}
+.btn {
+    border-radius: 20px;
+}
+.accordion-button:not(.collapsed) {
+    background-color: var(--light-color);
+    color: var(--primary-color);
+}
 </style>
-{% endblock %}
-
-{% block extra_js %}
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // 切換訂閱時長選項
-        const durationOptions = document.querySelectorAll('input[name="duration"]');
-        
-        durationOptions.forEach(option => {
-            option.addEventListener('change', function() {
-                // 如果在付款頁面，可以在這裡添加更新價格的邏輯
-                console.log('Selected duration:', this.value);
-            });
-        });
-    });
-</script>
 {% endblock %} 

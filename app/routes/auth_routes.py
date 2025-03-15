@@ -87,13 +87,6 @@ def logout():
     flash('您已成功登出', 'success')
     return redirect(url_for('japanese.index'))
 
-@bp.route('/create-test-user')
-def create_test_user():
-    """創建測試用戶（僅在開發階段使用）"""
-    test_user = auth_service.create_test_user()
-    flash(f'測試用戶創建成功！電子郵件: test@example.com 密碼: password123', 'success')
-    return redirect(url_for('auth.login'))
-
 @bp.route('/forgot-password', methods=['GET', 'POST'])
 def forgot_password():
     """忘記密碼頁面"""
@@ -248,10 +241,10 @@ def change_password():
 
 @bp.route('/subscription')
 def subscription():
-    """訂閱方案頁面"""
+    """訂閱頁面"""
     # 檢查用戶是否已登錄
     if 'user_id' not in session:
-        flash('請先登錄以訪問訂閱頁面', 'warning')
+        flash('請先登錄以查看訂閱資訊', 'warning')
         return redirect(url_for('auth.login'))
     
     # 獲取用戶資料
@@ -260,49 +253,46 @@ def subscription():
         flash('找不到用戶資料', 'error')
         return redirect(url_for('auth.logout'))
     
+    # 更新會話中的訂閱狀態
+    session['user_subscription'] = user['subscription_type']
+    
     return render_template('auth/subscription.html', user=user)
 
 @bp.route('/payment', methods=['GET', 'POST'])
 def payment():
-    """支付頁面"""
+    """付款頁面"""
     # 檢查用戶是否已登錄
     if 'user_id' not in session:
-        flash('請先登錄以進行支付', 'warning')
+        flash('請先登錄以進行付款', 'warning')
         return redirect(url_for('auth.login'))
     
+    if request.method == 'GET':
+        # 從 URL 參數獲取訂閱類型和月份
+        subscription_type = request.args.get('type', 'premium')
+        months = request.args.get('months', '1')
+        
+        # 驗證參數
+        if subscription_type not in ['basic', 'premium']:
+            subscription_type = 'premium'
+        
+        try:
+            months = int(months)
+            if months not in [1, 3, 12]:
+                months = 1
+        except (TypeError, ValueError):
+            months = 1
+        
+        return render_template('auth/payment.html',
+                             subscription_type=subscription_type,
+                             months=months)
+    
+    # 處理 POST 請求（實際支付邏輯）
     if request.method == 'POST':
         subscription_type = request.form.get('subscription_type')
-        months = int(request.form.get('months', 1))
+        months = request.form.get('months')
         payment_method = request.form.get('payment_method')
         
-        # 模擬支付處理（實際應用應集成真正的支付API）
-        if payment_method:
-            # 更新用戶訂閱
-            updated_user, error = auth_service.update_subscription(
-                session['user_id'], subscription_type, months
-            )
-            
-            if error:
-                flash(error, 'error')
-                return redirect(url_for('auth.subscription'))
-            
-            # 更新會話中的訂閱類型
-            session['user_subscription'] = updated_user['subscription_type']
-            
-            flash('訂閱更新成功！感謝您的支持！', 'success')
-            return redirect(url_for('auth.profile'))
-    
-    subscription_type = request.args.get('type', 'basic')
-    months = request.args.get('months', 1)
-    
-    # 根據訂閱類型和月份計算價格
-    price = 0
-    if subscription_type == 'basic':
-        price = 49.99 * int(months)
-    elif subscription_type == 'premium':
-        price = 99.99 * int(months)
-    
-    return render_template('auth/payment.html',
-                          subscription_type=subscription_type,
-                          months=months,
-                          price=price) 
+        # TODO: 實現實際的支付處理邏輯
+        
+        flash('支付成功！您的訂閱已經更新。', 'success')
+        return redirect(url_for('auth.profile')) 

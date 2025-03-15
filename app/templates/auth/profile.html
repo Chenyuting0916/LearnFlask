@@ -14,7 +14,15 @@
                     <div class="row mb-4">
                         <div class="col-md-4 text-center">
                             <div class="profile-img-container mb-3">
-                                <img src="{{ url_for('static', filename='images/default-avatar.png') }}" alt="用戶頭像" class="img-fluid rounded-circle" style="width: 150px; height: 150px;">
+                                {% if user.username %}
+                                    <div class="avatar-circle mx-auto">
+                                        <span class="avatar-text">{{ user.username[0]|upper }}</span>
+                                    </div>
+                                {% else %}
+                                    <div class="avatar-circle mx-auto">
+                                        <span class="avatar-text">U</span>
+                                    </div>
+                                {% endif %}
                             </div>
                             <h4>{{ user.username }}</h4>
                             <p class="text-muted">{{ user.subscription_type|capitalize }} 會員</p>
@@ -66,41 +74,6 @@
                     </div>
                 </div>
             </div>
-            
-            <div class="card mt-4">
-                <div class="card-header bg-info text-white">
-                    <h3 class="card-title mb-0">學習統計</h3>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="card mb-3">
-                                <div class="card-body text-center">
-                                    <h1 class="display-4">0</h1>
-                                    <p class="text-muted">已學習詞彙</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="card mb-3">
-                                <div class="card-body text-center">
-                                    <h1 class="display-4">0</h1>
-                                    <p class="text-muted">已完成測驗</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="card mt-4">
-                <div class="card-header bg-warning">
-                    <h3 class="card-title mb-0">收藏內容</h3>
-                </div>
-                <div class="card-body">
-                    <p class="text-center">您尚未收藏任何內容。</p>
-                </div>
-            </div>
         </div>
     </div>
 </div>
@@ -109,19 +82,38 @@
 {% block extra_css %}
 <style>
     .avatar-circle {
-        width: 100px;
-        height: 100px;
-        background-color: var(--primary-color);
+        width: 150px;
+        height: 150px;
+        background-color: #007bff;
         border-radius: 50%;
         display: flex;
         justify-content: center;
         align-items: center;
+        margin-bottom: 1rem;
     }
     
     .avatar-text {
         color: #fff;
-        font-size: 40px;
+        font-size: 72px;
         font-weight: bold;
+        text-transform: uppercase;
+    }
+    
+    .progress {
+        height: 25px;
+    }
+    
+    .progress-bar {
+        line-height: 25px;
+        font-size: 14px;
+    }
+    
+    .card-header {
+        padding: 1rem;
+    }
+    
+    .list-group-item:hover {
+        background-color: #f8f9fa;
     }
 </style>
 {% endblock %} 

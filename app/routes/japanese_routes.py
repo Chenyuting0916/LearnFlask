@@ -7,6 +7,7 @@ import json
 import os
 import requests
 from bs4 import BeautifulSoup
+from app.services import auth_service
 
 bp = Blueprint('japanese', __name__, url_prefix='/japanese')
 vocabulary_service = VocabularyService()
@@ -139,31 +140,56 @@ def quizzes():
     """展示日語測驗列表頁面，僅限訂閱會員使用"""
     # 獲取過濾參數
     level = request.args.get('level', '')
-    quiz_type = request.args.get('quiz_type', '')
+    
+    # 檢查用戶是否已登錄
+    if 'user_id' not in session:
+        flash('請先登錄以使用測驗功能。', 'warning')
+        return redirect(url_for('auth.login'))
     
     # 檢查用戶訂閱狀態
-    user_subscription = session.get('user_subscription', 'free')
-    if user_subscription == 'free':
+    user = auth_service.get_user_by_id(session['user_id'])
+    if not user:
+        flash('找不到用戶資料', 'error')
+        return redirect(url_for('auth.logout'))
+    
+    # 更新會話中的訂閱狀態
+    session['user_subscription'] = user['subscription_type']
+    
+    # 檢查訂閱狀態
+    if user['subscription_type'] == 'free':
         flash('測驗功能僅對訂閱會員開放，請升級訂閱以使用測驗功能。', 'warning')
         return redirect(url_for('auth.subscription'))
     
     # 從服務層獲取測驗列表
-    quizzes = japanese_service.get_quizzes(quiz_type=quiz_type, level=level)
+    quizzes = japanese_service.get_quizzes(level=level if level else None)
     
-    # 用戶測驗歷史記錄
-    user_quiz_history = []
+    # 獲取用戶測驗歷史記錄
+    user_quiz_history = japanese_service.get_user_quiz_history(session['user_id'])
     
     return render_template('japanese/quizzes.html', 
                           quizzes=quizzes,
                           user_quiz_history=user_quiz_history,
-                          user_subscription=user_subscription)
+                          user_subscription=user['subscription_type'])
 
 @bp.route('/quizzes/<quiz_id>')
 def quiz_detail(quiz_id):
     """測驗詳情頁面，僅限訂閱會員使用"""
+    # 檢查用戶是否已登錄
+    if 'user_id' not in session:
+        flash('請先登錄以使用測驗功能。', 'warning')
+        return redirect(url_for('auth.login'))
+    
     # 檢查用戶訂閱狀態
-    user_subscription = session.get('user_subscription', 'free')
-    if user_subscription == 'free':
+    user = auth_service.get_user_by_id(session['user_id'])
+    if not user:
+        flash('找不到用戶資料', 'error')
+        return redirect(url_for('auth.logout'))
+    
+    # 更新會話中的訂閱狀態
+    session['user_subscription'] = user['subscription_type']
+    
+    # 檢查訂閱狀態
+    if user['subscription_type'] == 'free':
         flash('測驗功能僅對訂閱會員開放，請升級訂閱以使用測驗功能。', 'warning')
         return redirect(url_for('auth.subscription'))
         
@@ -179,9 +205,22 @@ def quiz_detail(quiz_id):
 @bp.route('/quizzes/<quiz_id>/submit', methods=['POST'])
 def quiz_submit(quiz_id):
     """測驗提交，僅限訂閱會員使用"""
+    # 檢查用戶是否已登錄
+    if 'user_id' not in session:
+        flash('請先登錄以使用測驗功能。', 'warning')
+        return redirect(url_for('auth.login'))
+    
     # 檢查用戶訂閱狀態
-    user_subscription = session.get('user_subscription', 'free')
-    if user_subscription == 'free':
+    user = auth_service.get_user_by_id(session['user_id'])
+    if not user:
+        flash('找不到用戶資料', 'error')
+        return redirect(url_for('auth.logout'))
+    
+    # 更新會話中的訂閱狀態
+    session['user_subscription'] = user['subscription_type']
+    
+    # 檢查訂閱狀態
+    if user['subscription_type'] == 'free':
         flash('測驗功能僅對訂閱會員開放，請升級訂閱以使用測驗功能。', 'warning')
         return redirect(url_for('auth.subscription'))
         
@@ -212,6 +251,14 @@ def quiz_submit(quiz_id):
         }
     
     score = int((correct_count / len(quiz.questions)) * 100)
+    
+    # 記錄測驗歷史
+    japanese_service.add_quiz_history(
+        user_id=session['user_id'],
+        quiz_id=quiz_id,
+        score=score,
+        answers=user_answers
+    )
     
     return render_template('japanese/quiz_result.html', 
                           quiz=quiz, 
@@ -355,3 +402,102 @@ def api_n1_vocabulary():
         import traceback
         traceback.print_exc()
         return jsonify({'error': f"獲取詞彙時出錯: {str(e)}"}), 500 
+
+@bp.route('/jlpt-quiz')
+@bp.route('/jlpt-quiz/<level>/<year>/<section>')
+def jlpt_quiz(level=None, year=None, section=None):
+    """JLPT 真題測驗"""
+    # 檢查用戶是否已登錄
+    if 'user_id' not in session:
+        flash('請先登錄以參加測驗', 'warning')
+        return redirect(url_for('auth.login'))
+    
+    # 檢查用戶是否為付費會員
+    user_subscription = session.get('user_subscription', 'free')
+    if user_subscription == 'free':
+        flash('JLPT 測驗為付費功能，請升級會員以繼續', 'warning')
+        return redirect(url_for('auth.subscription'))
+    
+    # 獲取所有可用的測驗
+    quizzes = japanese_service.get_jlpt_quizzes()
+    
+    # 如果沒有指定具體測驗，顯示測驗列表
+    if not all([level, year, section]):
+        return render_template('japanese/jlpt_quiz.html', quizzes=quizzes)
+    
+    # 獲取指定的測驗
+    quiz = japanese_service.get_jlpt_quiz(level, year, section)
+    
+    return render_template('japanese/jlpt_quiz.html',
+                         quizzes=quizzes,
+                         quiz=quiz,
+                         level=level,
+                         year=year,
+                         section=section)
+
+@bp.route('/submit-quiz', methods=['POST'])
+def submit_quiz():
+    """提交 JLPT 測驗答案"""
+    if 'user_id' not in session:
+        flash('請先登錄以提交答案', 'warning')
+        return redirect(url_for('auth.login'))
+    
+    # 檢查用戶是否為付費會員
+    user_subscription = session.get('user_subscription', 'free')
+    if user_subscription == 'free':
+        flash('JLPT 測驗為付費功能，請升級會員以繼續', 'warning')
+        return redirect(url_for('auth.subscription'))
+    
+    # 獲取測驗信息
+    level = request.form.get('level')
+    year = request.form.get('year')
+    section = request.form.get('section')
+    
+    # 獲取答案
+    answers = {}
+    for key, value in request.form.items():
+        if key.startswith('answer_'):
+            question_id = int(key.split('_')[1])
+            answers[question_id] = int(value)
+    
+    # 獲取測驗題目和正確答案
+    quiz = japanese_service.get_jlpt_quiz(level, year, section)
+    
+    # 計算得分和生成解析
+    total_questions = len(quiz['questions'])
+    correct_answers = 0
+    results = []
+    
+    for question in quiz['questions']:
+        user_answer = answers.get(question['id'])
+        is_correct = user_answer == question['correct_answer']
+        if is_correct:
+            correct_answers += 1
+        
+        results.append({
+            'question': question['question'],
+            'user_answer': question['options'][user_answer] if user_answer is not None else None,
+            'correct_answer': question['options'][question['correct_answer']],
+            'is_correct': is_correct,
+            'explanation': question['explanation']
+        })
+    
+    score = (correct_answers / total_questions) * 100
+    
+    # 保存測驗結果
+    japanese_service.save_quiz_result(
+        user_id=session['user_id'],
+        quiz_type='JLPT',
+        level=level,
+        year=year,
+        section=section,
+        score=score,
+        answers=answers
+    )
+    
+    return render_template('japanese/quiz_result.html',
+                         level=level,
+                         year=year,
+                         section=section,
+                         score=score,
+                         results=results) 

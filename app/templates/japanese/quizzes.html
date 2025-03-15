@@ -11,7 +11,7 @@
         <div class="card-body">
             <h5 class="card-title">過濾測驗</h5>
             <form action="{{ url_for('japanese.quizzes') }}" method="get" class="row g-3">
-                <div class="col-md-4">
+                <div class="col-md-5">
                     <label for="level" class="form-label">難度級別</label>
                     <select class="form-select" id="level" name="level">
                         <option value="">所有級別</option>
@@ -22,7 +22,7 @@
                         <option value="N1">N1 (高級)</option>
                     </select>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-5">
                     <label for="quiz_type" class="form-label">測驗類型</label>
                     <select class="form-select" id="quiz_type" name="quiz_type">
                         <option value="">所有類型</option>
@@ -30,18 +30,17 @@
                         <option value="grammar">語法</option>
                         <option value="reading">閱讀</option>
                         <option value="listening">聽力</option>
-                        <option value="mixed">綜合</option>
                     </select>
                 </div>
-                <div class="col-md-4 d-flex align-items-end">
-                    <button type="submit" class="btn btn-primary w-100">應用過濾器</button>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">搜尋</button>
                 </div>
             </form>
         </div>
     </div>
     
     <!-- 測驗列表 -->
-    <div class="row row-cols-1 row-cols-md-2 g-4">
+    <div class="row row-cols-1 row-cols-md-2 g-4 mb-4">
         {% if quizzes %}
             {% for quiz in quizzes %}
                 <div class="col">
@@ -58,17 +57,11 @@
                                 <a href="{{ url_for('japanese.quiz_detail', quiz_id=quiz.id) }}" class="btn btn-sm btn-outline-primary">開始測驗</a>
                             </div>
                         </div>
-                        <div class="card-footer bg-light">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <small class="text-muted">已完成: {{ quiz.completion_count }} 次</small>
-                                <small class="text-muted">平均分數: {{ quiz.average_score|default('尚無', true) }}</small>
-                            </div>
-                        </div>
                     </div>
                 </div>
             {% endfor %}
         {% else %}
-            <div class="col-12 text-center py-5">
+            <div class="col-12">
                 <div class="alert alert-info">
                     <h4 class="alert-heading">暫無測驗</h4>
                     <p>
@@ -79,64 +72,14 @@
                         {% endif %}
                     </p>
                 </div>
-                <!-- 模擬測驗 -->
-                <div class="mt-4">
-                    <h5>您可能感興趣的測驗</h5>
-                    <div class="row row-cols-1 row-cols-md-2 g-4 mt-2">
-                        <div class="col">
-                            <div class="card h-100">
-                                <div class="card-body">
-                                    <h5 class="card-title">N5基礎詞彙測驗</h5>
-                                    <p class="card-text">測試您對JLPT N5級別常用詞彙的掌握程度。</p>
-                                    <div class="d-flex justify-content-between align-items-center mb-2">
-                                        <span class="badge bg-primary">N5</span>
-                                        <span class="badge bg-secondary">詞彙</span>
-                                    </div>
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <small class="text-muted">20 題 | 10 分鐘</small>
-                                        <a href="#" class="btn btn-sm btn-outline-primary">開始測驗</a>
-                                    </div>
-                                </div>
-                                <div class="card-footer bg-light">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <small class="text-muted">已完成: 342 次</small>
-                                        <small class="text-muted">平均分數: 75%</small>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col">
-                            <div class="card h-100">
-                                <div class="card-body">
-                                    <h5 class="card-title">N4語法挑戰</h5>
-                                    <p class="card-text">挑戰JLPT N4常見語法點的測驗，提高您的日語語法準確性。</p>
-                                    <div class="d-flex justify-content-between align-items-center mb-2">
-                                        <span class="badge bg-primary">N4</span>
-                                        <span class="badge bg-secondary">語法</span>
-                                    </div>
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <small class="text-muted">15 題 | 15 分鐘</small>
-                                        <a href="#" class="btn btn-sm btn-outline-primary">開始測驗</a>
-                                    </div>
-                                </div>
-                                <div class="card-footer bg-light">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <small class="text-muted">已完成: 187 次</small>
-                                        <small class="text-muted">平均分數: 68%</small>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
             </div>
         {% endif %}
     </div>
     
     <!-- 測驗結果歷史 -->
     {% if user_quiz_history %}
-        <div class="mt-5">
-            <h3>您的測驗歷史</h3>
+        <div class="mt-4">
+            <h3 class="mb-3">測驗歷史</h3>
             <div class="table-responsive">
                 <table class="table table-striped table-hover">
                     <thead>
@@ -181,17 +124,40 @@
     
     <!-- 訂閱提示 -->
     {% if user_subscription == 'free' %}
-        <div class="alert alert-info mt-5">
+        <div class="alert alert-info mt-4">
             <div class="row align-items-center">
                 <div class="col-md-8">
-                    <h4>升級到高級會員，解鎖專業測驗</h4>
-                    <p class="mb-0">訂閱高級會員計劃，即可獲取完整的JLPT模擬考試、詳細的答案解析以及個性化的學習建議。</p>
+                    <h4 class="mb-2">升級到付費會員，解鎖完整測驗功能</h4>
+                    <p class="mb-0">訂閱付費會員，即可獲取完整的測驗功能，幫助您更好地評估學習成果。</p>
                 </div>
                 <div class="col-md-4 text-md-end mt-3 mt-md-0">
-                    <a href="{{ url_for('auth.subscription') }}" class="btn btn-primary">查看高級方案</a>
+                    <a href="{{ url_for('auth.subscription') }}" class="btn btn-primary">查看會員方案</a>
                 </div>
             </div>
         </div>
     {% endif %}
 </div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.container {
+    max-width: 960px;
+}
+.card {
+    transition: transform 0.2s;
+}
+.card:hover {
+    transform: translateY(-5px);
+}
+.btn {
+    border-radius: 20px;
+}
+.progress {
+    border-radius: 10px;
+}
+.progress-bar {
+    transition: width 0.6s ease;
+}
+</style>
 {% endblock %} 
