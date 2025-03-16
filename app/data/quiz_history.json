@@ -92,5 +92,35 @@
     "score": 0.0,
     "answers": {},
     "created_at": "2025-03-15T23:19:44.557350"
+  },
+  {
+    "id": "89699a68-a69a-4cfe-8bfb-ff25e65d52c6",
+    "user_id": "05cdd11b-d80d-4641-aa82-c7312873053c",
+    "quiz_type": "JLPT",
+    "level": "N2",
+    "year": "2023",
+    "section": "文字・語彙",
+    "score": 100.0,
+    "answers": {
+      "1": 1
+    },
+    "created_at": "2025-03-16T02:15:14.306583"
+  },
+  {
+    "id": "ea93fae7-66fc-488b-a902-214aac7fa239",
+    "user_id": "05cdd11b-d80d-4641-aa82-c7312873053c",
+    "quiz_type": "JLPT",
+    "level": "N1",
+    "year": "2023",
+    "section": "文字・語彙",
+    "score": 60.0,
+    "answers": {
+      "1": 0,
+      "2": 0,
+      "3": 1,
+      "4": 2,
+      "5": 3
+    },
+    "created_at": "2025-03-16T16:06:43.106627"
   }
 ]

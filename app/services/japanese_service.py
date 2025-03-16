@@ -558,4 +558,161 @@ def save_quiz_result(user_id, quiz_type, level, year, section, score, answers):
         return True, None
     except Exception as e:
         print(f"保存測驗結果時出錯：{str(e)}")
-        return False, str(e) 
+        return False, str(e)
+
+def unfavorite_question(user_id, question_id):
+    """取消收藏測驗題目"""
+    try:
+        # 讀取收藏題目資料
+        favorite_file = os.path.join(DATA_DIR, 'favorite_questions.json')
+        if not os.path.exists(favorite_file):
+            return False, "找不到收藏資料"
+        
+        with open(favorite_file, 'r', encoding='utf-8') as f:
+            favorites = json.load(f)
+        
+        # 確保用戶的收藏列表存在
+        if user_id not in favorites:
+            return False, "用戶沒有收藏任何題目"
+        
+        # 查找並移除指定題目
+        user_favorites = favorites[user_id]
+        found = False
+        for i, question in enumerate(user_favorites):
+            if str(question['id']) == str(question_id):
+                user_favorites.pop(i)
+                found = True
+                break
+        
+        if not found:
+            return False, "找不到指定的收藏題目"
+        
+        # 保存更新後的收藏列表
+        favorites[user_id] = user_favorites
+        with open(favorite_file, 'w', encoding='utf-8') as f:
+            json.dump(favorites, f, ensure_ascii=False, indent=2)
+        
+        return True, None
+    except Exception as e:
+        print(f"取消收藏題目時出錯：{str(e)}")
+        return False, str(e)
+
+def get_random_n1_question():
+    """獲取隨機 N1 測驗題目"""
+    try:
+        jlpt_quizzes_file = os.path.join(DATA_DIR, 'jlpt_quizzes.json')
+        if os.path.exists(jlpt_quizzes_file):
+            with open(jlpt_quizzes_file, 'r', encoding='utf-8') as f:
+                jlpt_quizzes = json.load(f)
+            
+            # 獲取所有 N1 的問題
+            n1_questions = []
+            if 'N1' in jlpt_quizzes:
+                for year, sections in jlpt_quizzes['N1'].items():
+                    for section, quiz_data in sections.items():
+                        for question in quiz_data.get('questions', []):
+                            # 為每個問題添加元數據
+                            question['year'] = year
+                            question['section'] = section
+                            n1_questions.append(question)
+            
+            # 從所有問題中隨機選擇一個
+            if n1_questions:
+                import random
+                random_question = random.choice(n1_questions)
+                
+                # 處理閱讀理解題目，調整格式
+                if random_question.get('type') == 'reading':
+                    # 將問題文本處理得更美觀
+                    random_question['question'] = random_question['question'].replace('\n', '<br>')
+                
+                return random_question
+    except Exception as e:
+        print(f"獲取隨機 N1 題目時出錯：{str(e)}")
+    
+    # 如果沒有找到問題或出錯，返回一個默認問題
+    return {
+        'id': 'default_1',
+        'type': 'multiple_choice',
+        'question': '次の（　　）に入る最もよいものを、１・２・３・４から一つ選びなさい。<br><br>申し訳ございませんが、N1 測驗題目暫時無法找到。',
+        'options': [
+            '請重新載入頁面',
+            '請稍後再試',
+            '請聯繫管理員',
+            '請嘗試其他功能'
+        ],
+        'correct_answer': 1,
+        'explanation': '這是一個默認題目，表示無法找到 N1 測驗題目。請稍後再試。',
+        'year': '2023',
+        'section': '文字・語彙'
+    }
+
+def favorite_question(user_id, question_id):
+    """收藏測驗題目"""
+    try:
+        # 讀取收藏題目資料
+        favorite_file = os.path.join(DATA_DIR, 'favorite_questions.json')
+        if os.path.exists(favorite_file):
+            with open(favorite_file, 'r', encoding='utf-8') as f:
+                favorites = json.load(f)
+        else:
+            favorites = {}
+        
+        # 確保用戶的收藏列表存在
+        if user_id not in favorites:
+            favorites[user_id] = []
+        
+        # 獲取問題詳情
+        question = None
+        # 首先從標準 JLPT 題庫查找
+        jlpt_quizzes_file = os.path.join(DATA_DIR, 'jlpt_quizzes.json')
+        if os.path.exists(jlpt_quizzes_file):
+            with open(jlpt_quizzes_file, 'r', encoding='utf-8') as f:
+                jlpt_quizzes = json.load(f)
+            
+            # 在所有 N1 問題中查找
+            if 'N1' in jlpt_quizzes:
+                for year, sections in jlpt_quizzes['N1'].items():
+                    for section, quiz_data in sections.items():
+                        for q in quiz_data.get('questions', []):
+                            if str(q['id']) == str(question_id):
+                                question = q.copy()
+                                question['year'] = year
+                                question['section'] = section
+                                break
+        
+        # 如果找不到問題，返回錯誤
+        if not question:
+            return False, "找不到指定的問題"
+        
+        # 檢查問題是否已經收藏
+        for fav in favorites[user_id]:
+            if str(fav['id']) == str(question_id):
+                return True, None  # 已經收藏過了
+        
+        # 添加到收藏列表
+        favorites[user_id].append(question)
+        
+        # 保存收藏列表
+        with open(favorite_file, 'w', encoding='utf-8') as f:
+            json.dump(favorites, f, ensure_ascii=False, indent=2)
+        
+        return True, None
+    except Exception as e:
+        print(f"收藏問題時出錯：{str(e)}")
+        return False, str(e)
+
+def get_favorite_questions(user_id):
+    """獲取用戶收藏的問題"""
+    try:
+        favorite_file = os.path.join(DATA_DIR, 'favorite_questions.json')
+        if os.path.exists(favorite_file):
+            with open(favorite_file, 'r', encoding='utf-8') as f:
+                favorites = json.load(f)
+            
+            # 返回用戶的收藏列表
+            return favorites.get(user_id, [])
+    except Exception as e:
+        print(f"獲取收藏問題時出錯：{str(e)}")
+    
+    return [] 

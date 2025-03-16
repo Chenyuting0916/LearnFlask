@@ -1,0 +1,229 @@
+{% extends "common/layout.html" %}
+
+{% block title %}N1 收藏題目 - 日語學習平台{% endblock %}
+
+{% block content %}
+<style>
+/* 修復模態框內容不顯示的問題 */
+.modal-body {
+    max-height: 70vh;
+    overflow-y: auto;
+}
+.question-text, .options, .explanation {
+    word-break: break-word;
+}
+</style>
+
+<div class="container py-5">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1>N1 收藏題目</h1>
+                <a href="{{ url_for('japanese.n1_random_quiz') }}" class="btn btn-primary">
+                    <i class="fas fa-random me-2"></i>返回隨機測驗
+                </a>
+            </div>
+            
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+            
+            {% if questions %}
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">我的收藏題目</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>類型</th>
+                                    <th>題目</th>
+                                    <th>年份</th>
+                                    <th>部分</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for question in questions %}
+                                <tr data-question-id="{{ question.id }}" class="question-row">
+                                    <td>選擇題</td>
+                                    <td>
+                                        <a href="#" class="text-decoration-none question-link" 
+                                           data-bs-toggle="modal" data-bs-target="#questionModal"
+                                           data-question-id="{{ question.id }}"
+                                           data-question-text="{{ question.question|escape }}"
+                                           data-options="{{ question.options|tojson }}"
+                                           data-correct-answer="{{ question.correct_answer }}"
+                                           data-explanation="{{ question.explanation|escape }}">
+                                            {{ question.question|striptags|truncate(50) }}
+                                        </a>
+                                    </td>
+                                    <td>{{ question.year }}</td>
+                                    <td>{{ question.section }}</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-danger unfavorite-btn" 
+                                                data-question-id="{{ question.id }}">
+                                            <i class="fas fa-trash-alt me-1"></i>移除
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="alert alert-info">
+                <h4 class="alert-heading">尚未收藏任何題目！</h4>
+                <p>您目前尚未收藏任何 N1 測驗題目。請前往隨機測驗頁面，回答問題後將喜歡的題目加入收藏。</p>
+                <hr>
+                <p class="mb-0">
+                    <a href="{{ url_for('japanese.n1_random_quiz') }}" class="btn btn-primary">
+                        <i class="fas fa-play-circle me-2"></i>開始隨機測驗
+                    </a>
+                </p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- 問題詳情模態框 -->
+<div class="modal fade" id="questionModal" tabindex="-1" aria-labelledby="questionModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="questionModalLabel">問題詳情</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="關閉"></button>
+            </div>
+            <div class="modal-body">
+                <div class="question-text mb-4"></div>
+                
+                <div class="options mb-4">
+                    <!-- 選項將在這裡動態添加 -->
+                </div>
+                
+                <div class="explanation-container">
+                    <h5 class="text-success">解析</h5>
+                    <div class="explanation border p-3 rounded bg-light"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // 移除收藏功能
+    document.querySelectorAll('.unfavorite-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const questionId = this.dataset.questionId;
+            const questionRow = document.querySelector(`tr[data-question-id="${questionId}"]`);
+            
+            // 發送請求至後端
+            fetch('/japanese/api/unfavorite-question', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    question_id: questionId
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert(data.error);
+                } else {
+                    // 移除該行
+                    questionRow.remove();
+                    
+                    // 如果沒有更多收藏的問題，刷新頁面顯示空狀態
+                    if (document.querySelectorAll('.question-row').length === 0) {
+                        window.location.reload();
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('移除收藏失敗，請稍後再試');
+            });
+        });
+    });
+    
+    // 問題詳情模態框
+    const questionModal = document.getElementById('questionModal');
+    if (questionModal) {
+        questionModal.addEventListener('show.bs.modal', function(event) {
+            const button = event.relatedTarget;
+            const questionId = button.getAttribute('data-question-id');
+            const questionText = button.getAttribute('data-question-text');
+            const options = JSON.parse(button.getAttribute('data-options'));
+            const correctAnswer = parseInt(button.getAttribute('data-correct-answer'));
+            const explanation = button.getAttribute('data-explanation');
+            
+            // 填充問題文本
+            const modalQuestionText = questionModal.querySelector('.question-text');
+            modalQuestionText.innerHTML = questionText;
+            
+            // 填充選項
+            const optionsContainer = questionModal.querySelector('.options');
+            optionsContainer.innerHTML = '';
+            
+            options.forEach((option, index) => {
+                const optionDiv = document.createElement('div');
+                optionDiv.className = 'form-check mb-2';
+                
+                const optionInput = document.createElement('input');
+                optionInput.className = 'form-check-input';
+                optionInput.type = 'radio';
+                optionInput.name = 'modal_option';
+                optionInput.id = `modal_option_${index}`;
+                optionInput.value = index;
+                optionInput.disabled = true;
+                optionInput.checked = index === correctAnswer;
+                
+                const optionLabel = document.createElement('label');
+                optionLabel.className = 'form-check-label';
+                optionLabel.htmlFor = `modal_option_${index}`;
+                optionLabel.textContent = option;
+                
+                // 標記正確答案
+                if (index === correctAnswer) {
+                    optionLabel.classList.add('text-success');
+                    optionLabel.style.fontWeight = 'bold';
+                }
+                
+                optionDiv.appendChild(optionInput);
+                optionDiv.appendChild(optionLabel);
+                optionsContainer.appendChild(optionDiv);
+            });
+            
+            // 填充解析
+            const explanationContainer = questionModal.querySelector('.explanation');
+            explanationContainer.innerHTML = explanation;
+            
+            // 顯示對話框內容，確保內容可見
+            setTimeout(() => {
+                const modalBody = questionModal.querySelector('.modal-body');
+                if (modalBody) {
+                    modalBody.style.display = 'block';
+                }
+            }, 200);
+        });
+    }
+});
+</script>
+{% endblock %} 

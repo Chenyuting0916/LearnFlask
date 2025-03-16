@@ -500,4 +500,106 @@ def submit_quiz():
                          year=year,
                          section=section,
                          score=score,
-                         results=results) 
+                         results=results)
+
+@bp.route('/api/unfavorite-question', methods=['POST'])
+def unfavorite_question():
+    """取消收藏測驗題目"""
+    # 檢查用戶是否已登錄
+    if 'user_id' not in session:
+        return jsonify({'error': '請先登錄以操作收藏題目'})
+    
+    # 獲取請求數據
+    data = request.get_json()
+    if not data or 'question_id' not in data:
+        return jsonify({'error': '無效的請求數據'})
+    
+    # 取消收藏題目
+    question_id = data['question_id']
+    result, error = japanese_service.unfavorite_question(session['user_id'], question_id)
+    
+    if not result:
+        return jsonify({'error': error})
+    
+    return jsonify({'success': True})
+
+@bp.route('/n1-random-quiz')
+def n1_random_quiz():
+    """N1 隨機測驗頁面 - 以單詞學習模式展示測驗題目"""
+    # 檢查用戶是否已登錄
+    if 'user_id' not in session:
+        flash('請先登錄以參加測驗', 'warning')
+        return redirect(url_for('auth.login'))
+    
+    # 檢查用戶是否為付費會員
+    user_subscription = session.get('user_subscription', 'free')
+    if user_subscription == 'free':
+        flash('N1 隨機測驗為付費功能，請升級會員以繼續', 'warning')
+        return redirect(url_for('auth.subscription'))
+    
+    # 獲取 N1 測驗題目
+    random_question = japanese_service.get_random_n1_question()
+    
+    return render_template('japanese/n1_random_quiz.html', question=random_question)
+
+@bp.route('/api/n1-random-question')
+def api_n1_random_question():
+    """API端點，用於獲取隨機 N1 測驗題目"""
+    # 檢查用戶是否已登錄
+    if 'user_id' not in session:
+        return jsonify({'error': '請先登錄以參加測驗'})
+    
+    # 檢查用戶是否為付費會員
+    user_subscription = session.get('user_subscription', 'free')
+    if user_subscription == 'free':
+        return jsonify({'error': 'N1 隨機測驗為付費功能，請升級會員以繼續'})
+    
+    # 獲取隨機 N1 測驗題目
+    random_question = japanese_service.get_random_n1_question()
+    
+    return jsonify({'question': random_question})
+
+@bp.route('/api/favorite-question', methods=['POST'])
+def favorite_question():
+    """收藏測驗題目"""
+    # 檢查用戶是否已登錄
+    if 'user_id' not in session:
+        return jsonify({'error': '請先登錄以收藏題目'})
+    
+    # 檢查用戶是否為付費會員
+    user_subscription = session.get('user_subscription', 'free')
+    if user_subscription == 'free':
+        return jsonify({'error': '收藏題目為付費功能，請升級會員以繼續'})
+    
+    # 獲取請求數據
+    data = request.get_json()
+    if not data or 'question_id' not in data:
+        return jsonify({'error': '無效的請求數據'})
+    
+    # 收藏題目
+    question_id = data['question_id']
+    result, error = japanese_service.favorite_question(session['user_id'], question_id)
+    
+    if not result:
+        return jsonify({'error': error})
+    
+    return jsonify({'success': True})
+
+@bp.route('/n1-favorite-questions')
+def n1_favorite_questions():
+    """N1 收藏題目頁面"""
+    # 檢查用戶是否已登錄
+    if 'user_id' not in session:
+        flash('請先登錄以查看收藏題目', 'warning')
+        return redirect(url_for('auth.login'))
+    
+    # 檢查用戶是否為付費會員
+    user_subscription = session.get('user_subscription', 'free')
+    if user_subscription == 'free':
+        flash('收藏題目為付費功能，請升級會員以繼續', 'warning')
+        return redirect(url_for('auth.subscription'))
+    
+    # 獲取收藏的題目
+    favorite_questions = japanese_service.get_favorite_questions(session['user_id'])
+    
+    return render_template('japanese/n1_favorite_questions.html', questions=favorite_questions) 

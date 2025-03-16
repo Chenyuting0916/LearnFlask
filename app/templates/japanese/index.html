@@ -17,7 +17,7 @@
         {% else %}
             <p>繼續您的學習之旅！</p>
             <div class="mt-3">
-                <a href="{{ url_for('japanese.quizzes') }}" class="btn btn-primary">參加測驗</a>
+                <a href="{{ url_for('japanese.jlpt_quiz') }}" class="btn btn-primary">參加JLPT測驗</a>
             </div>
         {% endif %}
     </div>
@@ -51,7 +51,7 @@
                 <i class="fas fa-tasks fa-2x text-primary mb-2"></i>
                 <h4 class="card-title">會員測驗</h4>
                 <p class="card-text">付費會員專享的測驗功能，幫助您檢驗學習成果，掌握自己的學習進度。</p>
-                <a href="{{ url_for('japanese.quizzes') }}" class="btn btn-outline-primary">查看測驗</a>
+                <a href="{{ url_for('japanese.jlpt_quiz') }}" class="btn btn-outline-primary">查看JLPT測驗</a>
             </div>
         </div>
     </div>
@@ -118,7 +118,7 @@
         <a href="{{ url_for('auth.register') }}" class="btn btn-primary me-2">免費註冊</a>
         <a href="{{ url_for('auth.login') }}" class="btn btn-outline-primary">登錄</a>
     {% else %}
-        <a href="{{ url_for('japanese.quizzes') }}" class="btn btn-primary">開始測驗</a>
+        <a href="{{ url_for('japanese.jlpt_quiz') }}" class="btn btn-primary">開始JLPT測驗</a>
     {% endif %}
 </div>
 {% endblock %}

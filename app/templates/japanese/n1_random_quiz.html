@@ -1,0 +1,234 @@
+{% extends "common/layout.html" %}
+
+{% block title %}N1 隨機測驗 - 日語學習平台{% endblock %}
+
+{% block content %}
+<style>
+/* 修復閱讀理解題目顯示和選項框問題 */
+.reading-passage {
+    background-color: #f8f9fa;
+    padding: 1rem;
+    border-radius: 0.25rem;
+    margin-bottom: 1rem;
+    line-height: 1.8;
+}
+.form-check-label {
+    width: 100%;
+    padding: 0.375rem 0;
+}
+.form-check {
+    margin-bottom: 0.75rem;
+    padding: 0.5rem;
+    border-radius: 0.25rem;
+    transition: background-color 0.2s;
+}
+.form-check:hover {
+    background-color: #f8f9fa;
+}
+/* 確保按鈕不會被拉長 */
+.btn-container {
+    display: flex;
+    gap: 10px;
+}
+.btn-container button {
+    flex: 0 0 auto;
+    width: auto;
+}
+/* 答案卡片樣式 */
+#answer-explanation {
+    height: 100%;
+    margin-bottom: 0;
+}
+@media (max-width: 991.98px) {
+    #answer-explanation {
+        margin-top: 1rem;
+    }
+}
+</style>
+
+<div class="container py-5">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h1>N1 隨機測驗</h1>
+                <a href="{{ url_for('japanese.n1_favorite_questions') }}" class="btn btn-outline-primary">
+                    <i class="fas fa-bookmark me-2"></i>我的收藏
+                </a>
+            </div>
+            
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+        </div>
+    </div>
+    
+    <div class="row">
+        <!-- 左側問題區域 -->
+        <div class="col-lg-6 mb-4 mb-lg-0">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">問題 #{{ question.id }}</h5>
+                    <div>
+                        <span class="badge bg-light text-dark me-2">{{ question.year }}年</span>
+                        <span class="badge bg-light text-dark">{{ question.section }}</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="question-text mb-4">
+                        {{ question.question|safe }}
+                    </div>
+                    
+                    <div class="options">
+                        <form id="quiz-form">
+                            {% for option in question.options %}
+                            <div class="form-check mb-3">
+                                <input class="form-check-input answer-option" type="radio" 
+                                       name="answer" 
+                                       id="option_{{ loop.index0 }}"
+                                       value="{{ loop.index0 }}">
+                                <label class="form-check-label w-100" for="option_{{ loop.index0 }}">
+                                    {{ option }}
+                                </label>
+                            </div>
+                            {% endfor %}
+                        </form>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <div class="btn-container">
+                        <button id="show-answer-btn" class="btn btn-outline-primary">顯示答案</button>
+                        <button id="next-question-btn" class="btn btn-primary" disabled>下一題</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 右側答案區域 -->
+        <div class="col-lg-6">
+            <div id="answer-explanation" class="card shadow-sm d-none h-100">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">解析</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-4">
+                        <h6>正確答案：</h6>
+                        <div class="correct-answer">
+                            <strong>{{ question.options[question.correct_answer] }}</strong>
+                        </div>
+                    </div>
+                    <div>
+                        <h6>詳細解析：</h6>
+                        <div class="explanation">
+                            {{ question.explanation|safe }}
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <button id="favorite-btn" class="btn btn-outline-warning">
+                        <i class="far fa-bookmark me-2"></i>收藏此題
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 將問題數據存儲為 JSON -->
+<script id="question-data" type="application/json">
+{
+    "id": "{{ question.id }}",
+    "correct_answer": {{ question.correct_answer }},
+    "explanation": {{ question.explanation|tojson }}
+}
+</script>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // 從 JSON 腳本中解析問題數據
+    const questionDataScript = document.getElementById('question-data');
+    const questionData = JSON.parse(questionDataScript.textContent);
+    
+    // 初始化變數
+    const currentQuestion = {
+        id: questionData.id,
+        correctAnswer: questionData.correct_answer,
+        explanation: questionData.explanation
+    };
+    
+    // 事件監聽器
+    const showAnswerBtn = document.getElementById('show-answer-btn');
+    const nextQuestionBtn = document.getElementById('next-question-btn');
+    const favoriteBtn = document.getElementById('favorite-btn');
+    const answerExplanation = document.getElementById('answer-explanation');
+    const answerOptions = document.querySelectorAll('.answer-option');
+    
+    // 顯示答案
+    showAnswerBtn.addEventListener('click', function() {
+        // 顯示解析
+        answerExplanation.classList.remove('d-none');
+        
+        // 禁用所有選項
+        answerOptions.forEach(option => {
+            option.disabled = true;
+            
+            // 標記正確答案為綠色
+            if (parseInt(option.value) === currentQuestion.correctAnswer) {
+                option.parentElement.classList.add('text-success');
+                option.parentElement.style.fontWeight = 'bold';
+            }
+            
+            // 如果用戶選擇了錯誤答案，標記為紅色
+            if (option.checked && parseInt(option.value) !== currentQuestion.correctAnswer) {
+                option.parentElement.classList.add('text-danger');
+            }
+        });
+        
+        // 隱藏顯示答案按鈕
+        showAnswerBtn.classList.add('d-none');
+        
+        // 啟用下一題按鈕
+        nextQuestionBtn.disabled = false;
+    });
+    
+    // 下一題
+    nextQuestionBtn.addEventListener('click', function() {
+        window.location.reload();
+    });
+    
+    // 收藏題目
+    favoriteBtn.addEventListener('click', function() {
+        // 發送請求至後端
+        fetch('/japanese/api/favorite-question', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                question_id: currentQuestion.id
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                alert(data.error);
+            } else {
+                favoriteBtn.innerHTML = '<i class="fas fa-bookmark me-2"></i>已收藏';
+                favoriteBtn.disabled = true;
+                favoriteBtn.classList.remove('btn-outline-warning');
+                favoriteBtn.classList.add('btn-warning');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('收藏失敗，請稍後再試');
+        });
+    });
+});
+</script>
+{% endblock %} 

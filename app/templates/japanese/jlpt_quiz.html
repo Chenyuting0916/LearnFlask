@@ -11,30 +11,67 @@
             <h1 class="mb-4">JLPT 真題測驗</h1>
             <div class="card shadow-sm">
                 <div class="card-body">
-                    <div class="row">
-                        {% for level, years in quizzes.items() %}
-                        <div class="col-md-4 mb-4">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h3>測驗模式選擇</h3>
+                    </div>
+                    <div class="row mb-4">
+                        <div class="col-md-6">
                             <div class="card h-100">
                                 <div class="card-header bg-primary text-white">
-                                    <h3 class="mb-0">{{ level }}</h3>
+                                    <h4 class="mb-0">傳統測驗模式</h4>
                                 </div>
                                 <div class="card-body">
-                                    {% for year, sections in years.items() %}
-                                    <h5 class="mt-3">{{ year }}年</h5>
-                                    <div class="list-group">
-                                        {% for section in sections %}
-                                        <a href="{{ url_for('japanese.jlpt_quiz', level=level, year=year, section=section) }}" 
-                                           class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
-                                            {{ section }}
-                                            <span class="badge bg-primary rounded-pill">60分</span>
-                                        </a>
-                                        {% endfor %}
+                                    <p>以完整測驗方式進行，同時測試多道題目並計算分數。</p>
+                                    <div class="mt-3">
+                                        <button class="btn btn-primary w-100" type="button" data-bs-toggle="collapse" data-bs-target="#collapseQuizList">
+                                            選擇測驗
+                                        </button>
                                     </div>
-                                    {% endfor %}
                                 </div>
                             </div>
                         </div>
-                        {% endfor %}
+                        <div class="col-md-6">
+                            <div class="card h-100">
+                                <div class="card-header bg-success text-white">
+                                    <h4 class="mb-0">N1 隨機題目模式</h4>
+                                </div>
+                                <div class="card-body">
+                                    <p>一次顯示一道隨機 N1 題目，答題後立即顯示詳解，可收藏喜歡的題目。</p>
+                                    <div class="mt-3">
+                                        <a href="{{ url_for('japanese.n1_random_quiz') }}" class="btn btn-success w-100">
+                                            開始隨機測驗
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="collapse" id="collapseQuizList">
+                        <div class="row">
+                            {% for level, years in quizzes.items() %}
+                            <div class="col-md-4 mb-4">
+                                <div class="card h-100">
+                                    <div class="card-header bg-primary text-white">
+                                        <h3 class="mb-0">{{ level }}</h3>
+                                    </div>
+                                    <div class="card-body">
+                                        {% for year, sections in years.items() %}
+                                        <h5 class="mt-3">{{ year }}年</h5>
+                                        <div class="list-group">
+                                            {% for section in sections %}
+                                            <a href="{{ url_for('japanese.jlpt_quiz', level=level, year=year, section=section) }}" 
+                                               class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                                {{ section }}
+                                                <span class="badge bg-primary rounded-pill">60分</span>
+                                            </a>
+                                            {% endfor %}
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -46,7 +83,7 @@
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h1>{{ level }} {{ section }} ({{ year }})</h1>
-                <div id="timer" class="h3">
+                <div id="timer" class="h3" data-time-limit="{{ quiz.time_limit|default(30) }}">
                     <i class="fas fa-clock me-2"></i>
                     <span id="minutes">30</span>:<span id="seconds">00</span>
                 </div>
@@ -99,9 +136,11 @@
 {% if quiz %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // 設置計時器
-    let timeLeft = {{ quiz.time_limit * 60 }};
-    const timerDisplay = document.getElementById('timer');
+    // 從數據屬性中獲取測驗時間，預設為30分鐘
+    const timerElement = document.getElementById('timer');
+    const quizTimeLimitMinutes = parseInt(timerElement.dataset.timeLimit) || 30;
+    let timeLeft = quizTimeLimitMinutes * 60;
+    
     const minutesDisplay = document.getElementById('minutes');
     const secondsDisplay = document.getElementById('seconds');
     
@@ -115,7 +154,7 @@ document.addEventListener('DOMContentLoaded', function() {
         secondsDisplay.textContent = seconds.toString().padStart(2, '0');
         
         if (timeLeft <= 300) { // 最後5分鐘
-            timerDisplay.classList.add('text-danger');
+            timerElement.classList.add('text-danger');
         }
         
         if (timeLeft <= 0) {
