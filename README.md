@@ -87,7 +87,7 @@ python app.py
 2. 選擇 Flask 框架和 Python 3.10 / Choose Flask framework and Python 3.10
 3. 設置以下環境變量 / Set the following environment variables:
    - `FLASK_ENV`: `production`
-   - `FLASK_SECRET_KEY`: `your-secret-key`
+   - `FLASK_SECRET_KEY`: 至少 32 字元的隨機字串，不要用範例值，也不要提交到 git
 
 ### GitHub Actions 自動部署 / GitHub Actions Auto Deployment
 配置以下 Secrets / Configure the following Secrets:

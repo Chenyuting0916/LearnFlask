@@ -1,18 +1,58 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, session, jsonify
+from flask import Blueprint, render_template, request, redirect, url_for, flash, session, current_app
+from flask_wtf.csrf import validate_csrf
+from wtforms.validators import ValidationError
 from app.services import auth_service
-import secrets
-import re
+import time
 import logging
+
+_ATTEMPTS = {}
+_ATTEMPT_WINDOW_SECONDS = 300
+_ATTEMPT_LIMIT = 8
 
 # 設置日誌
 logger = logging.getLogger(__name__)
 
 bp = Blueprint('auth', __name__, url_prefix='/auth')
 
+def _client_key():
+    return request.remote_addr or "unknown"
+
+def _too_many_attempts(action):
+    now = time.time()
+    key = f"{action}:{_client_key()}"
+    recent = [stamp for stamp in _ATTEMPTS.get(key, []) if now - stamp < _ATTEMPT_WINDOW_SECONDS]
+    if len(recent) >= _ATTEMPT_LIMIT:
+        _ATTEMPTS[key] = recent
+        return True
+    recent.append(now)
+    _ATTEMPTS[key] = recent
+    return False
+
+@bp.before_request
+def _check_csrf():
+    if request.method != "POST":
+        return None
+    try:
+        validate_csrf(request.form.get("csrf_token"))
+    except ValidationError:
+        flash("表單已失效，請重新整理後再試一次", "error")
+        return redirect(request.url)
+    return None
+
+def _start_session(user):
+    session.clear()
+    session["user_id"] = user["id"]
+    session["username"] = user["username"]
+    session["user_subscription"] = user["subscription_type"]
+    session.permanent = True
+
 @bp.route('/register', methods=['GET', 'POST'])
 def register():
     """用戶註冊頁面"""
     if request.method == 'POST':
+        if _too_many_attempts("register"):
+            flash("嘗試次數過多，請稍後再試", "error")
+            return render_template('auth/register.html')
         username = request.form.get('username')
         email = request.form.get('email')
         password = request.form.get('password')
@@ -33,10 +73,7 @@ def register():
             flash(error, 'error')
             return render_template('auth/register.html')
         
-        # 註冊成功，設置會話
-        session['user_id'] = user['id']
-        session['username'] = user['username']
-        session['user_subscription'] = user['subscription_type']
+        _start_session(user)
         
         flash('註冊成功！歡迎加入我們的日語學習平台。', 'success')
         return redirect(url_for('japanese.index'))
@@ -47,6 +84,9 @@ def register():
 def login():
     """用戶登錄頁面"""
     if request.method == 'POST':
+        if _too_many_attempts("login"):
+            flash("嘗試次數過多，請稍後再試", "error")
+            return render_template('auth/login.html')
         email = request.form.get('email')
         password = request.form.get('password')
         
@@ -61,12 +101,8 @@ def login():
             flash(error, 'error')
             return render_template('auth/login.html')
         
-        # 登錄成功，設置會話
-        session['user_id'] = user['id']
-        session['username'] = user['username']
-        session['user_subscription'] = user['subscription_type']
-        
-        logger.info(f"用戶登錄成功：{user['username']}, 會話ID：{session.get('user_id')}")
+        _start_session(user)
+        logger.info("用戶登錄成功")
         flash('登錄成功！', 'success')
         return redirect(url_for('japanese.index'))
     
@@ -96,18 +132,19 @@ def forgot_password():
         if not email:
             flash('電子郵件是必填的', 'error')
             return render_template('auth/forgot_password.html')
-        
-        # 生成重置令牌
-        token, error = auth_service.generate_reset_token(email)
-        if error:
-            flash(error, 'error')
+
+        if _too_many_attempts("reset"):
+            flash("嘗試次數過多，請稍後再試", "error")
             return render_template('auth/forgot_password.html')
         
-        # 在實際應用中，這裡應該發送一封電子郵件
-        # 為了測試方便，我們直接顯示重置鏈接
-        reset_url = url_for('auth.reset_password', token=token, _external=True)
-        flash(f'密碼重置鏈接已生成：{reset_url}', 'success')
-        
+        token, error = auth_service.generate_reset_token(email)
+        if token and current_app.debug:
+            reset_url = url_for('auth.reset_password', token=token, _external=True)
+            current_app.logger.info("開發模式密碼重設連結：%s", reset_url)
+        elif error:
+            current_app.logger.info("密碼重設要求未建立令牌")
+
+        flash('如果這個電子郵件已經註冊，重設方式會由系統處理。重設連結不會顯示在頁面上。', 'success')
         return render_template('auth/forgot_password.html')
     
     return render_template('auth/forgot_password.html')
@@ -292,7 +329,11 @@ def payment():
         months = request.form.get('months')
         payment_method = request.form.get('payment_method')
         
-        # TODO: 實現實際的支付處理邏輯
-        
-        flash('支付成功！您的訂閱已經更新。', 'success')
-        return redirect(url_for('auth.profile')) 
+        current_app.logger.info(
+            "忽略尚未接通的付款請求：type=%s months=%s method=%s",
+            subscription_type,
+            months,
+            payment_method,
+        )
+        flash('付款功能尚未接通，訂閱狀態沒有變更。', 'warning')
+        return redirect(url_for('auth.subscription')) 

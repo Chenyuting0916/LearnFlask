@@ -1,11 +1,15 @@
 import json
 import os
-import hashlib
+import re
 import uuid
 import secrets
 import logging
 from datetime import datetime, timedelta
+from werkzeug.security import check_password_hash, generate_password_hash
 from app.models.user import User
+
+MIN_PASSWORD_LENGTH = 8
+_LEGACY_SHA256 = re.compile(r"^[0-9a-f]{64}$")
 
 # 模擬用戶數據庫（實際應用中應使用真正的數據庫）
 DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'data')
@@ -30,9 +34,24 @@ def _ensure_data_dir():
             json.dump({}, f)
             logger.info(f"創建密碼重置令牌文件: {RESET_TOKENS_FILE}")
 
+def _validate_password(password):
+    """拒絕過短的密碼。"""
+    if not password or len(password) < MIN_PASSWORD_LENGTH:
+        return f"密碼至少需要 {MIN_PASSWORD_LENGTH} 個字元"
+    return None
+
 def _hash_password(password):
-    """對密碼進行雜湊處理"""
-    return hashlib.sha256(password.encode()).hexdigest()
+    """使用帶鹽的慢雜湊，不接受舊的純 SHA-256。"""
+    return generate_password_hash(password)
+
+def _check_password(stored_password, password):
+    """驗證密碼。已外洩的無鹽 SHA-256 一律視為無效。"""
+    if not stored_password or _LEGACY_SHA256.fullmatch(stored_password):
+        return False
+    try:
+        return check_password_hash(stored_password, password)
+    except (TypeError, ValueError):
+        return False
 
 def _load_users():
     """載入所有用戶"""
@@ -94,9 +113,13 @@ def register_user(username, email, password):
     """註冊新用戶"""
     users = _load_users()
     
+    password_error = _validate_password(password)
+    if password_error:
+        return None, password_error
+
     # 檢查用戶名或電子郵件是否已存在
     if any(u.username == username for u in users) or any(u.email == email for u in users):
-        logger.warning(f"嘗試註冊已存在的用戶: {username}/{email}")
+        logger.warning("嘗試註冊已存在的用戶")
         return None, "用戶名或電子郵件已存在"
     
     # 創建新用戶
@@ -121,35 +144,18 @@ def register_user(username, email, password):
 
 def login_user(email, password):
     """登錄用戶"""
-    logger.info(f"嘗試登錄: {email}")
     users = _load_users()
-    hashed_password = _hash_password(password)
-    
-    # 遍歷用戶並打印調試信息
+
     for user in users:
-        logger.info(f"檢查用戶: {user.email}")
-        
-        # 檢查用戶電子郵件
         if user.email == email:
-            logger.info(f"找到匹配的電子郵件: {email}")
-            
-            # 檢查密碼
             stored_password = getattr(user, 'password', None)
-            logger.info(f"存儲的密碼雜湊: {stored_password}")
-            logger.info(f"輸入的密碼雜湊: {hashed_password}")
-            
-            if stored_password and stored_password == hashed_password:
-                logger.info(f"用戶 {email} 密碼驗證成功")
-                
-                # 返回用戶（不包含密碼）
+            if _check_password(stored_password, password):
                 user_dict = user.to_dict()
-                if 'password' in user_dict:
-                    user_dict.pop('password', None)
+                user_dict.pop('password', None)
                 return user_dict, None
-            else:
-                logger.warning(f"用戶 {email} 密碼不匹配")
-                
-    logger.warning(f"登錄失敗: {email}")
+            break
+
+    logger.warning("登錄失敗")
     return None, "電子郵件或密碼不正確"
 
 def get_user_by_id(user_id):
@@ -182,7 +188,7 @@ def generate_reset_token(email):
     """生成密碼重置令牌"""
     user = get_user_by_email(email)
     if not user:
-        logger.warning(f"嘗試為不存在的用戶生成重置令牌: {email}")
+        logger.warning("嘗試為不存在的用戶生成重置令牌")
         return None, "找不到用戶"
     
     # 生成令牌
@@ -223,6 +229,10 @@ def verify_reset_token(token):
 
 def reset_password(token, new_password):
     """重置用戶密碼"""
+    password_error = _validate_password(new_password)
+    if password_error:
+        return False, password_error
+
     # 驗證令牌
     user_id, error = verify_reset_token(token)
     if error:
@@ -283,9 +293,13 @@ def change_user_password(user_id, current_password, new_password):
     
     for i, user in enumerate(users):
         if user.id == user_id:
+            password_error = _validate_password(new_password)
+            if password_error:
+                return False, password_error
+
             # 驗證當前密碼
-            if user.password != _hash_password(current_password):
-                logger.warning(f"用戶 {user_id} 密碼驗證失敗")
+            if not _check_password(user.password, current_password):
+                logger.warning("密碼驗證失敗")
                 return False, "當前密碼不正確"
             
             # 更新密碼
@@ -294,7 +308,7 @@ def change_user_password(user_id, current_password, new_password):
             logger.info(f"用戶 {user_id} 密碼修改成功")
             return True, None
     
-    logger.warning(f"嘗試修改不存在用戶的密碼: {user_id}")
+    logger.warning("嘗試修改不存在用戶的密碼")
     return False, "找不到用戶"
 
 def update_subscription(user_id, subscription_type, months=1):
@@ -324,43 +338,5 @@ def update_subscription(user_id, subscription_type, months=1):
         logger.info(f"用戶 {user_id} 訂閱更新成功: {subscription_type}")
         return user_dict, None
     
-    logger.warning(f"嘗試更新不存在用戶的訂閱: {user_id}")
-    return None, "找不到用戶"
-
-# 用於測試的功能：創建測試用戶
-def create_test_user():
-    """創建測試用戶"""
-    test_username = "testuser"
-    test_email = "test@example.com"
-    test_password = "password123"
-    
-    users = _load_users()
-    
-    # 檢查測試用戶是否已存在
-    for user in users:
-        if user.email == test_email:
-            logger.info(f"測試用戶已存在: {test_email}")
-            user_dict = user.to_dict()
-            if 'password' in user_dict:
-                user_dict.pop('password', None)
-            return user_dict
-    
-    # 創建新的測試用戶
-    new_user = User(
-        id=str(uuid.uuid4()),
-        username=test_username,
-        email=test_email,
-        password=_hash_password(test_password),
-        created_at=datetime.now(),
-        subscription_type='free'
-    )
-    
-    users.append(new_user)
-    _save_users(users)
-    logger.info(f"測試用戶創建成功: {test_email}")
-    
-    # 返回新用戶（不包含密碼）
-    user_dict = new_user.to_dict()
-    if 'password' in user_dict:
-        user_dict.pop('password', None)
-    return user_dict 
+    logger.warning("嘗試更新不存在用戶的訂閱")
+    return None, "找不到用戶" 

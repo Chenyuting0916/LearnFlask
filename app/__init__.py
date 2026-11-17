@@ -1,10 +1,33 @@
+import os
+from datetime import timedelta
+
 from flask import Flask, session, redirect, url_for
+from flask_wtf.csrf import CSRFProtect
 from config.settings import Config
+
+csrf = CSRFProtect()
 
 def create_app(config_class=Config):
     """創建並配置 Flask 應用"""
     app = Flask(__name__)
     app.config.from_object(config_class)
+    app.config.update(
+        WTF_CSRF_CHECK_DEFAULT=False,
+        WTF_CSRF_TIME_LIMIT=3600,
+        SESSION_COOKIE_HTTPONLY=True,
+        SESSION_COOKIE_SAMESITE="Lax",
+        PERMANENT_SESSION_LIFETIME=timedelta(hours=12),
+    )
+    if os.environ.get("FLASK_ENV", "").lower() == "production":
+        app.config["SESSION_COOKIE_SECURE"] = True
+    csrf.init_app(app)
+
+    @app.after_request
+    def set_security_headers(response):
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["X-Frame-Options"] = "DENY"
+        response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+        return response
 
     # 確保靜態和數據目錄存在
     from app.services import japanese_service

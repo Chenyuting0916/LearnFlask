@@ -3,7 +3,7 @@ import os
 
 # 從環境變量獲取配置
 debug_mode = os.environ.get('FLASK_DEBUG', 'False').lower() == 'true'
-host = os.environ.get('FLASK_HOST', '0.0.0.0')
+host = os.environ.get('FLASK_HOST', '127.0.0.1')
 port = int(os.environ.get('PORT', 5000))
 
 # 創建應用

@@ -44,6 +44,7 @@
                     
                     <!-- 支付表單 -->
                     <form method="post" action="{{ url_for('auth.payment') }}" id="payment-form">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         <input type="hidden" name="subscription_type" value="{{ subscription_type }}">
                         <input type="hidden" name="months" value="{{ months }}">
                         
