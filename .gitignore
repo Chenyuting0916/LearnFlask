@@ -47,4 +47,10 @@ vocabulary.json
 learned_words.json
 
 # Environment variables
-.env 
+.env
+
+# Account data. Created at runtime and must not be committed.
+app/data/users.json
+app/data/reset_tokens.json
+app/data/quiz_history.json
+app/data/favorite_questions.json

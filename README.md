@@ -74,6 +74,8 @@ mkdir -p app/data cache
 python app.py
 ```
 
+`app/data/users.json` 不會進版控。第一次註冊時，程式會自己建立空的使用者儲存。
+
 ## 部署 / Deployment
 
 ### 本地部署 / Local Deployment
@@ -87,7 +89,7 @@ python app.py
 2. 選擇 Flask 框架和 Python 3.10 / Choose Flask framework and Python 3.10
 3. 設置以下環境變量 / Set the following environment variables:
    - `FLASK_ENV`: `production`
-   - `FLASK_SECRET_KEY`: `your-secret-key`
+   - `FLASK_SECRET_KEY`: 至少 32 字元的隨機字串。正式環境未設定或仍用範例值時，應用會直接拒絕啟動。本機未設定時，每次啟動會產生隨機金鑰。
 
 ### GitHub Actions 自動部署 / GitHub Actions Auto Deployment
 配置以下 Secrets / Configure the following Secrets:
