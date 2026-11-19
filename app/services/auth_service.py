@@ -1,11 +1,14 @@
 import json
 import os
-import hashlib
+import re
 import uuid
 import secrets
 import logging
 from datetime import datetime, timedelta
+from werkzeug.security import check_password_hash, generate_password_hash
 from app.models.user import User
+
+_LEGACY_SHA256 = re.compile(r"^[0-9a-f]{64}$")
 
 # 模擬用戶數據庫（實際應用中應使用真正的數據庫）
 DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'data')
@@ -31,8 +34,17 @@ def _ensure_data_dir():
             logger.info(f"創建密碼重置令牌文件: {RESET_TOKENS_FILE}")
 
 def _hash_password(password):
-    """對密碼進行雜湊處理"""
-    return hashlib.sha256(password.encode()).hexdigest()
+    """使用 Werkzeug 帶鹽雜湊，不再使用無鹽 SHA-256。"""
+    return generate_password_hash(password)
+
+def _check_password(stored_password, password):
+    """驗證密碼。已外洩的無鹽 SHA-256 一律視為無效。"""
+    if not stored_password or _LEGACY_SHA256.fullmatch(str(stored_password)):
+        return False
+    try:
+        return check_password_hash(stored_password, password)
+    except (TypeError, ValueError):
+        return False
 
 def _load_users():
     """載入所有用戶"""
@@ -123,7 +135,6 @@ def login_user(email, password):
     """登錄用戶"""
     logger.info(f"嘗試登錄: {email}")
     users = _load_users()
-    hashed_password = _hash_password(password)
     
     # 遍歷用戶並打印調試信息
     for user in users:
@@ -133,12 +144,8 @@ def login_user(email, password):
         if user.email == email:
             logger.info(f"找到匹配的電子郵件: {email}")
             
-            # 檢查密碼
             stored_password = getattr(user, 'password', None)
-            logger.info(f"存儲的密碼雜湊: {stored_password}")
-            logger.info(f"輸入的密碼雜湊: {hashed_password}")
-            
-            if stored_password and stored_password == hashed_password:
+            if _check_password(stored_password, password):
                 logger.info(f"用戶 {email} 密碼驗證成功")
                 
                 # 返回用戶（不包含密碼）
@@ -284,7 +291,7 @@ def change_user_password(user_id, current_password, new_password):
     for i, user in enumerate(users):
         if user.id == user_id:
             # 驗證當前密碼
-            if user.password != _hash_password(current_password):
+            if not _check_password(user.password, current_password):
                 logger.warning(f"用戶 {user_id} 密碼驗證失敗")
                 return False, "當前密碼不正確"
             
